@@ -1,4 +1,7 @@
+#pragma once 
+
 #include <string>
+#include <vector>
 #include "Ticker.h"
 
 enum STATE { IDLE, SINGLE_CLICK, DOUBLE_CLICK, LONG_PRESS };
@@ -17,6 +20,7 @@ class Button
         void (*singleClickCallback)(), (*doubleClickCallback)();
         enum STATE state;
         Ticker timer;
+        static std::vector<Button*> buttons;
 
     public:
         Button();
