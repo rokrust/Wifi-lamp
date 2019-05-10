@@ -7,12 +7,11 @@ Button::Button()
 {
     singleClickCallback = NULL;
     doubleClickCallback = NULL;
-    state = IDLE;
     buttonPin = 0;
     clickTimeOut = 500;
 
-    unsigned char previousValue = LOW;
-    unsigned long previousValueTimeStamp = 0;
+    previousValue = LOW;
+    previousValueTimeStamp = 0;
 
     Button::buttons.push_back(this);
 }
@@ -41,6 +40,10 @@ void Button::onEvent(std::string e, void (*callback)())
 
 }
 
+void Button::activate()
+{
+    attachInterrupt(digitalPinToInterrupt(buttonPin), &Button::handleButtonPress, CHANGE);
+}
 
 //When button is pressed:
     //Identify source
@@ -49,10 +52,52 @@ void Button::onEvent(std::string e, void (*callback)())
     //If state is idle: Measure click time
         //If short click: start timer
         //Else: state = long press
+
+//Input button state directly into the FSM
+//The FSM will contain the timer and trigger
+//the appropriate callback functions
 void Button::handleButtonPress()
 {
-    //Identify interrupt source
-    
+    //Determine interrupt source
+    Button* interruptSource;
+    for(int i = 0; i < buttons.size(); i++)
+    {
+        interruptSource = buttons[i];
+        unsigned char value = digitalRead(interruptSource->buttonPin);
+
+        //Source of the interrupt located
+        if(interruptSource->previousValue != value)
+        {
+            interruptSource.previousValue = value;
+
+            //From low to high
+            if(value == HIGH)
+            {
+                //If timeout since last click, then restart sequence
+
+                interruptSource.timer.start();
+            }
+
+            //From high to low
+            else
+            {
+                if(interruptSource.timer.time() <= shortClickDuration)
+                {
+                    //Add short click to sequence
+                }
+
+                else
+                {
+                    //Add long click to sequence
+                }
+                
+                //Start timer to measure sequence timeout
+                interruptSource.timer.start();
+            }
+            
+        }
+    }
+
 
     if(state == IDLE)
     {

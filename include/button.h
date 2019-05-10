@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "Ticker.h"
+#include "timer.h"
 
 enum STATE { IDLE, SINGLE_CLICK, DOUBLE_CLICK, LONG_PRESS };
 typedef void (*func_t)();
@@ -17,16 +18,19 @@ class Button
     private:
         unsigned char buttonPin;
         unsigned int clickTimeOut, shortClickDuration;
+        unsigned char previousValue;
+        Timer timer;
+
         void (*singleClickCallback)(), (*doubleClickCallback)();
-        enum STATE state;
-        Ticker timer;
+
         static std::vector<Button*> buttons;
 
     public:
         Button();
         Button(unsigned char pin);
 
+        void activate();
         void onEvent(std::string e, void (*callback)());
-        void handleButtonPress();
+        static void handleButtonPress();
 
 };
