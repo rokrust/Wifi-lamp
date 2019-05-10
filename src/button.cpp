@@ -56,6 +56,50 @@ void Button::activate()
 //Input button state directly into the FSM
 //The FSM will contain the timer and trigger
 //the appropriate callback functions
+// void Button::handleButtonPress()
+// {
+//     //Determine interrupt source
+//     Button* interruptSource;
+//     for(int i = 0; i < buttons.size(); i++)
+//     {
+//         interruptSource = buttons[i];
+//         unsigned char value = digitalRead(interruptSource->buttonPin);
+
+//         //Source of the interrupt located
+//         if(interruptSource->previousValue != value)
+//         {
+//             interruptSource.previousValue = value;
+
+//             //From low to high
+//             if(value == HIGH)
+//             {
+//                 //If timeout since last click, then restart sequence
+
+//                 interruptSource.timer.start();
+//             }
+
+//             //From high to low
+//             else
+//             {
+//                 if(interruptSource.timer.time() <= shortClickDuration)
+//                 {
+//                     //Add short click to sequence
+//                 }
+
+//                 else
+//                 {
+//                     //Add long click to sequence
+//                 }
+                
+//                 //Start timer to measure sequence timeout
+//                 interruptSource.timer.start();
+//             }
+            
+//         }
+//     }
+
+// }
+
 void Button::handleButtonPress()
 {
     //Determine interrupt source
@@ -64,43 +108,7 @@ void Button::handleButtonPress()
     {
         interruptSource = buttons[i];
         unsigned char value = digitalRead(interruptSource->buttonPin);
-
-        //Source of the interrupt located
-        if(interruptSource->previousValue != value)
-        {
-            interruptSource.previousValue = value;
-
-            //From low to high
-            if(value == HIGH)
-            {
-                //If timeout since last click, then restart sequence
-
-                interruptSource.timer.start();
-            }
-
-            //From high to low
-            else
-            {
-                if(interruptSource.timer.time() <= shortClickDuration)
-                {
-                    //Add short click to sequence
-                }
-
-                else
-                {
-                    //Add long click to sequence
-                }
-                
-                //Start timer to measure sequence timeout
-                interruptSource.timer.start();
-            }
-            
-        }
+        interruptSource.stateMachine.input(value);
     }
 
-
-    if(state == IDLE)
-    {
-
-    }
 }

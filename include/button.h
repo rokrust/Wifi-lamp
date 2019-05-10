@@ -4,6 +4,7 @@
 #include <vector>
 #include "Ticker.h"
 #include "timer.h"
+#include "button-fsm.h"
 
 enum STATE { IDLE, SINGLE_CLICK, DOUBLE_CLICK, LONG_PRESS };
 typedef void (*func_t)();
@@ -26,6 +27,7 @@ class Button
         static std::vector<Button*> buttons;
 
     public:
+        Fsm stateMachine;
         Button();
         Button(unsigned char pin);
 
