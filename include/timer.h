@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Arduino.h>
 
 class Timer
@@ -7,5 +9,5 @@ class Timer
 
     public:
         void start() { tic = millis(); }
-        unsigned long time() { return millis() - time; }
+        unsigned long time() { return millis() - tic; }
 };

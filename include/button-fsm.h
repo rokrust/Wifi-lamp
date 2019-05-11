@@ -1,20 +1,28 @@
+#pragma once
+#include <Arduino.h>
+#include <ticker.h>
 #include "timer.h"
 
-enum States { NONE, S, SS, L, LS, SL, LL };
+enum State { NONE, SINGLE_CLICK, DOUBLE_CLICK, LONG_CLICK, LONG_SHORT_CLICK, SHORT_LONG_CLICK, DOUBLE_LONG_CLICK, NSTATES };
 enum ClickType { SHORT, LONG };
 
 class Fsm
 {
     private:
-        States currentState;
+        State currentState;
         Timer timer;
+        Ticker ticker;
         unsigned char currentValue;
-        unsigned int shortClickDuration, clickTimeOut;
-        handleInputChange(unsigned char val);
-        transition(ClickType clickType);
+        unsigned int shortClickDuration, sequenceTimeout;
+        void (*callbacks [NSTATES])();
+
+        void handleInputChange(unsigned char val);
+        void transition(ClickType clickType);
+        void invokeEventCallback(void (*callback)());
 
     public:
-        Fsm() { currentValue = LOW; }
-        Fsm(unsigned char startValue) { currentValue = startValue; }
+        Fsm(unsigned int clickDuration=500, unsigned int timeout=1000);
+        
+        void setCallback(State state, void (*callback)()) { callbacks[(int)state] = callback; }
         void input(unsigned char val);
 };

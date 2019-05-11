@@ -1,69 +1,94 @@
-void Fsm::handleInputChange(unsigned char val)
+#include <Arduino.h>
+#include <functional>
+#include "button-fsm.h"
+
+Fsm::Fsm(unsigned int clickDuration, unsigned int timeout)
 {
+    shortClickDuration = clickDuration;
+    sequenceTimeout = timeout;
+    currentValue = LOW;
+    currentState = NONE;
+
+    for(int i = 0; i < NSTATES; i++)
+    {
+        callbacks[i] = NULL;
+    }
+}
+
+void Fsm::invokeEventCallback(void (*callback)())
+{ 
+    currentState = NONE; 
+
+    if(!callback)
+    {
+        return;
+    }
+    
+    callback(); 
+} 
+
+void Fsm::handleInputChange(unsigned char val)
+{   
     //From low to high. Click initiated
     if(val == HIGH)
     {
-        //if timeout, reset sequence
-        if(timer.time() >= clickTimeout)
-        {
-            currentState = NONE;
-        }
-
         timer.start(); //start measuring click length
     }
 
     //From High to low. Click stopped
     else
     {
+        //Identify click type
         if(timer.time() <= shortClickDuration)
         {
             transition(SHORT);
-            Serial.println("Short click");
         }
 
         else
         {
-            transition(LONG);
             Serial.println("Long click");
+            transition(LONG);
         }
-        
-        //Start measuring click timeout
-        timer.start();
     }
     
 }
+
+
+// TODO: reset state to NONE after callback is called
 
 void Fsm::transition(ClickType clickType)
 {
     switch(currentState)
     {
         case NONE:
-            currentState = clickType == SHORT ? S : L;
+            currentState = (State)(clickType == SHORT ? SINGLE_CLICK : LONG_CLICK);
             break;
-        case S:
-            currentState = clickType == SHORT ? SS : SL;
+        case SINGLE_CLICK:
+            currentState = (State)(clickType == SHORT ? DOUBLE_CLICK : SHORT_LONG_CLICK);
             break;
-        case L:
-            currentState = clickType == SHORT ? LS : LL;
+        case LONG_CLICK:
+            currentState = (State)(clickType == SHORT ? LONG_SHORT_CLICK : DOUBLE_LONG_CLICK);
             break;
-        case SS:
-            currentState = clickType == SHORT ? SS : SL;
+        case DOUBLE_CLICK:
+            currentState = (State)(clickType == SHORT ? DOUBLE_CLICK : SHORT_LONG_CLICK);
             break;
-        case LS:
-            currentState = clickType == SHORT ? SS : SL;
+        case LONG_SHORT_CLICK:
+            currentState = (State)(clickType == SHORT ? DOUBLE_CLICK : SHORT_LONG_CLICK);
             break;
-        case SL:
-            currentState = clickType == SHORT ? LS : LL;
+        case SHORT_LONG_CLICK:
+            currentState = (State)(clickType == SHORT ? LONG_SHORT_CLICK : DOUBLE_LONG_CLICK);
             break;
-        case LL:
-            currentState = clickType == SHORT ? LS : LL;
+        case DOUBLE_LONG_CLICK:
+            currentState = (State)(clickType == SHORT ? LONG_SHORT_CLICK : DOUBLE_LONG_CLICK);
             break;
         default:
             currentState = currentState;
             break;
     }
 
-    Serial.println("Transitioned to state" + currentState);
+    //Invoke callback after button sequence timeouts
+    ticker.detach();
+    ticker.once_ms(sequenceTimeout, std::bind(&Fsm::invokeEventCallback, this, callbacks[(int)currentState]));
 }
 
 void Fsm::input(unsigned char val)
@@ -71,51 +96,8 @@ void Fsm::input(unsigned char val)
     //Input has changed. Run state machine
     if(val != currentValue)
     {
+        currentValue = val;
         handleInputChange(val);
     }
     
 }
-
-// void Button::handleButtonPress()
-// {
-//     //Determine interrupt source
-//     Button* interruptSource;
-//     for(int i = 0; i < buttons.size(); i++)
-//     {
-//         interruptSource = buttons[i];
-//         unsigned char value = digitalRead(interruptSource->buttonPin);
-
-//         //Source of the interrupt located
-//         if(interruptSource->previousValue != value)
-//         {
-//             interruptSource.previousValue = value;
-
-//             //From low to high
-//             if(value == HIGH)
-//             {
-//                 //If timeout since last click, then restart sequence
-
-//                 interruptSource.timer.start();
-//             }
-
-//             //From high to low
-//             else
-//             {
-//                 if(interruptSource.timer.time() <= shortClickDuration)
-//                 {
-//                     //Add short click to sequence
-//                 }
-
-//                 else
-//                 {
-//                     //Add long click to sequence
-//                 }
-                
-//                 //Start timer to measure sequence timeout
-//                 interruptSource.timer.start();
-//             }
-            
-//         }
-//     }
-
-// }

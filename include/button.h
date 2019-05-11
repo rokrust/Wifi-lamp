@@ -6,8 +6,6 @@
 #include "timer.h"
 #include "button-fsm.h"
 
-enum STATE { IDLE, SINGLE_CLICK, DOUBLE_CLICK, LONG_PRESS };
-typedef void (*func_t)();
 
 //When button is pressed:
     //If state is idle: Measure click time
@@ -18,18 +16,13 @@ class Button
 {
     private:
         unsigned char buttonPin;
-        unsigned int clickTimeOut, shortClickDuration;
-        unsigned char previousValue;
-        Timer timer;
-
-        void (*singleClickCallback)(), (*doubleClickCallback)();
-
         static std::vector<Button*> buttons;
+        Fsm stateMachine;
 
     public:
-        Fsm stateMachine;
         Button();
         Button(unsigned char pin);
+        Button(unsigned char pin, unsigned int shortClickDuration, unsigned int sequenceTimeout);
 
         void activate();
         void onEvent(std::string e, void (*callback)());

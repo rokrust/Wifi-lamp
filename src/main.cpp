@@ -2,31 +2,45 @@
 #include "button.h"
 
 const byte interruptPin = 13;
-const byte R = 16;
-const byte G = 5;
-const byte B = 4;
-Button button(13);
+const byte rpin = 16;
+const byte gpin = 5;
+const byte bpin = 4;
+volatile byte val = 255;
+Button button(13, 500, 1000);
 
 
-void handleInterrupt() {
-  Serial.println("Button pressed");
-  digitalWrite(R, LOW);
-  digitalWrite(G, HIGH);
-  digitalWrite(B, HIGH);
+void singleClick() {
+  Serial.println("Event: Single click");
+
+  digitalWrite(rpin, val);
+  digitalWrite(gpin, val);
+  digitalWrite(bpin, val);
+}
+
+void doubleClick() {
+  Serial.println("Event: Double click");
+
+  val -= 20;
+  Serial.println(val);
+  analogWrite(rpin, val);
+  analogWrite(gpin, val);
+  analogWrite(bpin, val);
 }
 
 void setup() {
   Serial.begin(9600);
 
-  pinMode(R, OUTPUT);
-  pinMode(G, OUTPUT);
-  pinMode(B, OUTPUT);
+  pinMode(rpin, OUTPUT);
+  pinMode(gpin, OUTPUT);
+  pinMode(bpin, OUTPUT);
 
-  digitalWrite(R, LOW);
-  digitalWrite(G, LOW);
-  digitalWrite(B, LOW);
+  digitalWrite(rpin, LOW);
+  digitalWrite(gpin, LOW);
+  digitalWrite(bpin, LOW);
 
-  button.onEvent("click", handleInterrupt);
+  button.onEvent("click", singleClick);
+  button.onEvent("double-click", doubleClick);
+  button.activate();
 }
 
 void loop() {
