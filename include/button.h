@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 #include "Ticker.h"
 #include "timer.h"
 #include "button-fsm.h"
@@ -25,7 +26,7 @@ class Button
         Button(unsigned char pin, unsigned int shortClickDuration, unsigned int sequenceTimeout);
 
         void activate();
-        void onEvent(std::string e, void (*callback)());
+        void onEvent(std::string e, std::function<void()> callback);
         static void handleButtonPress();
 
 };

@@ -8,23 +8,21 @@ Fsm::Fsm(unsigned int clickDuration, unsigned int timeout)
     sequenceTimeout = timeout;
     currentValue = LOW;
     currentState = NONE;
-
+    
     for(int i = 0; i < NSTATES; i++)
     {
         callbacks[i] = NULL;
     }
 }
 
-void Fsm::invokeEventCallback(void (*callback)())
-{ 
+void Fsm::invokeEventCallback(std::function<void()> callback)
+{
     currentState = NONE; 
-
-    if(!callback)
+    if(callback)
     {
-        return;
-    }
-    
-    callback(); 
+        callback(); 
+        Serial.println("State reset");
+    } 
 } 
 
 void Fsm::handleInputChange(unsigned char val)
@@ -58,6 +56,9 @@ void Fsm::handleInputChange(unsigned char val)
 
 void Fsm::transition(ClickType clickType)
 {
+    Serial.print("Current state: ");
+    Serial.print(currentState);
+    Serial.print("\n");
     switch(currentState)
     {
         case NONE:
@@ -87,8 +88,19 @@ void Fsm::transition(ClickType clickType)
     }
 
     //Invoke callback after button sequence timeouts
-    ticker.detach();
-    ticker.once_ms(sequenceTimeout, std::bind(&Fsm::invokeEventCallback, this, callbacks[(int)currentState]));
+    if(currentState == SINGLE_CLICK || currentState == LONG_CLICK)
+    {
+        schedule.detach();
+        schedule.once_ms(sequenceTimeout, std::bind(&Fsm::invokeEventCallback, this, callbacks[(int)currentState]));
+    }
+
+    //Invoke callback immediately
+    else
+    {
+        schedule.detach();
+        invokeEventCallback(callbacks[(int)currentState]);
+    }
+    
 }
 
 void Fsm::input(unsigned char val)

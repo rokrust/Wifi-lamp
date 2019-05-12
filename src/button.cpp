@@ -21,22 +21,16 @@ Button::Button(unsigned char pin, unsigned int shortClickDuration, unsigned int 
     buttons.push_back(this);
 }
 
-void Button::onEvent(std::string e, void (*callback)())
+void Button::onEvent(std::string e, std::function<void()> callback)
 {
     if(!e.compare("click"))
     {
         stateMachine.setCallback(SINGLE_CLICK, callback);
-        Serial.print("Single click callback: ");
-        Serial.print((int)SINGLE_CLICK);
-        Serial.print("\n\n");
     }
 
     else if (!e.compare("double-click"))
     {
         stateMachine.setCallback(DOUBLE_CLICK, callback);
-        Serial.print("double click callback: ");
-        Serial.print((int)DOUBLE_CLICK);
-        Serial.print("\n\n");
     }
 
     else if (!e.compare("long-click"))
