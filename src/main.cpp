@@ -1,11 +1,15 @@
 #include <Arduino.h>
+#include <functional>
+#include <ESP8266WiFi.h>
 #include "button.h"
+#include "rgbled.h"
 
 const byte interruptPin = 13;
 const byte rpin = 16;
 const byte gpin = 5;
 const byte bpin = 4;
 volatile byte val = 255;
+RgbLed led(16, 5, 4);
 Button button(13, 500, 1000);
 
 
@@ -38,8 +42,11 @@ void setup() {
   digitalWrite(gpin, LOW);
   digitalWrite(bpin, LOW);
 
-  button.onEvent("click", singleClick);
-  button.onEvent("double-click", doubleClick);
+  led.on(150, 60, 120);
+  if(WiFi.softAP("ESP8266 test", "")) Serial.println("All ready to go");
+
+  button.onEvent("click", [](){ led.dim(14); });
+  button.onEvent("double-click", [](){ led.brighten(10); });
   button.activate();
 }
 
