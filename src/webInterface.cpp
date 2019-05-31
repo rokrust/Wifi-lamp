@@ -1,44 +1,8 @@
 #include "webInterface.h"
+#include "credentials.h"
+
 #include <ESP8266mDNS.h>
 #include <Arduino.h>
-
-//Move these into separate fs module
-struct WifiCredentials
-{
-    String ssid;
-    String password;
-};
-
-struct MqttCredentials
-{
-    String name;
-    String password;
-    String user;
-    int port;
-};
-
-struct Credentials
-{
-    WifiCredentials wifi;
-    MqttCredentials mqtt;
-};
-
-const WifiCredentials wifiCredentials = {
-    .ssid = "",
-    .password = ""
-};
-
-const MqttCredentials mqttCredentials = { 
-    .name = "", 
-    .password = "", 
-    .user = "", 
-    .port = 0 
-};
-
-const Credentials credentials = {
-    .wifi = wifiCredentials,
-    .mqtt = mqttCredentials
-};
 
 WebInterface::WebInterface() : client(credentials.mqtt.name.c_str(), credentials.mqtt.port, espClient)
 {
