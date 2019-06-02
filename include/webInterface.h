@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <PubSubClient.h>
+#include "credentials.h"
 
 class WebInterface
 {
@@ -15,8 +16,11 @@ class WebInterface
 
     public:
         WebInterface();
-        void setup(String topic);
+        void connectToWifi(WifiCredentials wifiAp);
+        void connectToMqtt(MqttCredentials mqtt, String topic);
+        void reconnectServices(Credentials credentials, String topic);
+        
         void configMode(const String html);
         void publish(char* topic, char* msg) { client.publish(topic, msg); }
-        void loop() { setup("wifi-lamp"); client.loop(); }
+        void loop() { reconnectServices(credentials, "wifi-lamp"); client.loop(); }
 };

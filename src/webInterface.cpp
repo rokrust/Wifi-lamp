@@ -32,7 +32,7 @@ void WebInterface::configMode(const String html)
 
 }
 
-//Setup
+//reconnectServicesIfDisconnected
     //Connect to wifi
     //if connected to wifi
         //authorize mqtt    client.connect("Wifi-lamp", mqttServer.user, mqttServer.password);
@@ -40,13 +40,13 @@ void WebInterface::configMode(const String html)
 
 
 /*
-setup
+reconnectServicesIfDisconnected
     connect to wifi
     connect to mqtt
 
 */
 
-void WebInterface::setup(String topic)
+void WebInterface::connectToWifi(WifiCredentials wifiAp)
 {
     //WiFi.mode(WIFI_STA);
     if(!WiFi.isConnected())
@@ -54,6 +54,10 @@ void WebInterface::setup(String topic)
         WiFi.begin(credentials.wifi.ssid, credentials.wifi.password);
     }
 
+}
+
+void WebInterface::connectToMqtt(MqttCredentials mqtt, String topic)
+{
     if(!client.connected())
     {
         if(client.connect("Wifi-lamp", credentials.mqtt.user.c_str(), credentials.mqtt.password.c_str()))
@@ -62,5 +66,11 @@ void WebInterface::setup(String topic)
         }
     }
 
+}
+
+void WebInterface::reconnectServices(Credentials credentials, String topic)
+{
+    connectToWifi(credentials.wifi);
+    connectToMqtt(credentials.mqtt, topic);
 }
 
