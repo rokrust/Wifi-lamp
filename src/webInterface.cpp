@@ -49,6 +49,7 @@ String WebInterface::getContentType(String path)
     else if(path.endsWith(".ico")) return "image/x-icon";
     else if(path.endsWith(".xml")) return "text/xml";
     else if(path.endsWith(".pdf")) return "application/x-pdf";
+    else if(path.endsWith(".svg")) return "image/svg+xml";
     else if(path.endsWith(".zip")) return "application/x-zip";
     else if(path.endsWith(".gz")) return "application/x-gzip";
     return "text/plain";
