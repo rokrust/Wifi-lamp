@@ -25,6 +25,18 @@ WebInterface::~WebInterface()
 }
 
 
+String WebInterface::removePath(String url)
+{
+    for(int i = url.length() - 1; i > 0; i--)
+    {
+        if(url[i] == '/')
+        {
+            return url.substring(i);
+        }
+    }
+    return url;
+}
+
 String WebInterface::getContentType(String path)
 {
     if(path.endsWith(".htm")) return "text/html";
@@ -82,7 +94,6 @@ void WebInterface::setupServer()
     WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Lamp Config");
 
-    server.begin();
 
     server.on("/upload", HTTP_POST, [this](){
         String path = server.uri();
@@ -99,17 +110,20 @@ void WebInterface::setupServer()
     });
 
     server.onNotFound([this](){
-        String path = server.uri();
-        Serial.println(String("Requested: ") + path);
+        String path = removePath(server.uri());
         path = "/build" + path;
         if(path.endsWith("/")) path += "index.html";
 
         String contentType = getContentType(path);
+        if(!SPIFFS.exists(path)) Serial.println("Requested file " + String(path) + " could not be found");
+
         File file = SPIFFS.open(path, "r");
         size_t size = server.streamFile(file, contentType);
         file.close();
-        Serial.println(String("Sent file: ") + path);
     });
+
+    server.begin();
+
 }
 
 void WebInterface::connectToWifi(WifiCredentials wifiAp)

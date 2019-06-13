@@ -22,6 +22,7 @@ class WebInterface
 
         String getContentType(String path);
         void uploadFile(String path);
+        String removePath(String url);
 
     public:
         WebInterface();
@@ -33,5 +34,5 @@ class WebInterface
         void reconnectServices(Credentials credentials, String topic);
         
         void publish(char* topic, char* msg) { client.publish(topic, msg); }
-        void loop() { reconnectServices(credentials, "wifi-lamp"); client.loop(); }
+        void loop() { reconnectServices(credentials, "wifi-lamp"); client.loop(); server.handleClient();}
 };
