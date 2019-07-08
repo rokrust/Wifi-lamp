@@ -1,7 +1,8 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import FileUploadButton from './components/file-upload'
+import WifiIcon from './components/wifi-list/wifi-icon'
+import WifiApList from './components/wifi-list';
 
 function App() {
   return (
@@ -19,8 +20,10 @@ function App() {
         >
           Learn React
         </a>
-        <FileUploadButton />
       </header>
+      <div style={{width: "100%"}}>
+        <WifiApList apList={[{name: "Fjell og sverd", signalStrength: 2}, {name: "Fjell og sverd 5G", signalStrength: 80}]}/>
+      </div>
     </div>
   );
 }
