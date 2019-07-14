@@ -20,14 +20,12 @@ export default class WifiAp extends Component {
     
     render() {
         return (
-            <div>
-                <ApWrap>
-                    <WifiName>{this.state.name}</WifiName>
-                    <IconWrapper>
-                        <WifiIcon signalStrength={this.state.signalStrength} width="5em" height="5em"/>
-                    </IconWrapper>
-                </ApWrap>
-            </div>
+            <ApWrap>
+                <WifiName>{this.state.name}</WifiName>
+                <IconWrapper>
+                    <WifiIcon signalStrength={this.state.signalStrength} width="2.5em" height="2.5em"/>
+                </IconWrapper>
+            </ApWrap>
         );
     }
 }
@@ -41,19 +39,22 @@ const ApWrap = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 0em 10em;
-    border: groove;
+    padding: 0.5em 0em;
+    margin: 1em;
+    display: flex;
+    background-color: ${props => props.theme.secondary};
 `;
 
 const WifiName = styled.p`
     align-self: left;
     font-size: 1.7em;
     position: relative;
-    left: 3em;
+    left: 0.3em;
+    color: ${props => props.theme.secondaryText};
 `;
 
 const IconWrapper = styled.div`
-    align-self: right;
+    align-self: center;
     position: relative;
-    right: 3em;
+    right: 1em;
 `;

@@ -1,9 +1,10 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
-import WifiIcon from './components/wifi-list/wifi-icon'
-import WifiApList from './components/wifi-list';
+import {Switch, Route} from 'react-router-dom'
+import Wifi from './pages/wifi'
 
+
+/*
 function App() {
   return (
     <div className="App">
@@ -24,6 +25,19 @@ function App() {
       <div style={{width: "100%"}}>
         <WifiApList apList={[{name: "Fjell og sverd", signalStrength: 2}, {name: "Fjell og sverd 5G", signalStrength: 80}]}/>
       </div>
+    </div>
+  );
+}
+*/
+
+function App() {
+  return (
+    <div className="App">
+      <header className="App-header">
+          <Switch>
+            <Route exact path='/' component={Wifi} />
+          </Switch>
+      </header>
     </div>
   );
 }

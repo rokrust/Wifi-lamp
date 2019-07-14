@@ -11,12 +11,14 @@ export default class WifiApList extends Component {
 
     render() {
         return (
-            <WifiList>
+            <>
                 { this.sortedAp.map(ap => <WifiAp name={ap.name} signalStrength={ap.signalStrength}/>) }
-            </WifiList>
+            </>
         )
     }
 }
+
+export let apObject = (name, signalStrength) => { return { name, signalStrength } }
 
 const WifiList = styled.div`
 `;

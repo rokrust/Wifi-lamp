@@ -3,8 +3,17 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import { BrowserRouter } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import { lightTheme } from './themes'
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(
+    <ThemeProvider theme={lightTheme}>
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
+    </ThemeProvider>
+    , document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
