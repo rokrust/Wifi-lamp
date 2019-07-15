@@ -2,15 +2,11 @@ import React, {Component} from 'react';
 import withHeader from '../components/header'
 import WifiApList, { apObject } from '../components/wifi-list'
 import styled from 'styled-components'
-var ScrollArea = require('react-scrollbar')
 
 class Wifi extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            availableWifi : []
-        };
-
+        
         this.apList = [
             apObject("Fjell og sverd", 2),
             apObject("Fjell og sverd 5G", 80),
@@ -19,10 +15,14 @@ class Wifi extends Component {
             apObject("Eduroam", 30),
             apObject("Blargh", 50)
         ];
+
+        this.state = {
+            availableWifi : this.apList
+        };
     }
 
     /*componentDidMount() {
-        fetch('') //Should receive from esp. What should the URL be?
+        fetch('http://www.wifiLamp.local/aplist') //Should receive from esp. What should the URL be?
         .then(response => response.json())
         .then(data => this.setState({ availableWifi : data }));
     }*/
@@ -30,7 +30,7 @@ class Wifi extends Component {
     render() {
         return (
             <ApListWrapper>
-                <WifiApList apList={this.apList} />
+                <WifiApList apList={this.state.availableWifi} />
             </ApListWrapper>
         );
     }
