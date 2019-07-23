@@ -1,7 +1,9 @@
 import React from 'react';
 import './App.css';
-import {Switch, Route} from 'react-router-dom'
+import {Switch, Route, Redirect} from 'react-router-dom'
 import Wifi from './pages/wifi'
+import Test1 from './pages/test1'
+import Test2 from './pages/test2'
 
 
 /*
@@ -35,7 +37,9 @@ function App() {
     <div className="App">
       <header className="App-header">
           <Switch>
-            <Route exact path='/' component={Wifi} />
+            <Route path='/' component={Wifi} />
+            <Route exact path='/test1' component={Test1} />
+            <Route exact path='/test2' component={Test2} />
           </Switch>
       </header>
     </div>

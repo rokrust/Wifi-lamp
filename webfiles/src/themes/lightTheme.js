@@ -4,7 +4,9 @@ export default {
     primaryDark: "#003c8f",
     primaryText: "#ffffff",
     secondary: "#4caf50",
-    secondaryLigth: "#80e27e",
+    secondaryLight: "#80e27e",
     secondaryDark: "#087f23",
     secondaryText: "#000000",
 }
+
+//#c1cee3

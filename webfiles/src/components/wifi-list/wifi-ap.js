@@ -20,7 +20,7 @@ export default class WifiAp extends Component {
     
     render() {
         return (
-            <ApWrap>
+            <ApWrap key={this.state.name}>
                 <WifiName>{this.state.name}</WifiName>
                 <IconWrapper>
                     <WifiIcon signalStrength={this.state.signalStrength} width="2.5em" height="2.5em"/>
@@ -40,7 +40,9 @@ const ApWrap = styled.div`
     flex-direction: row;
     justify-content: space-between;
     padding: 0.5em 0em;
-    margin: 1em;
+    border-style: solid;
+    border-color: ${props => props.theme.secondaryDark};
+    border-width: 0.1em;
     display: flex;
     background-color: ${props => props.theme.secondary};
 `;

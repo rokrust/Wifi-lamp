@@ -30,7 +30,9 @@ const RouterButton = styled.div`
     padding: 0.5em 1em;
     background-color: ${props => props.theme.primaryLight};
     &:hover {
-        background-color: ${props => props.theme.primary};;
+        & > span {
+            border-bottom: 0.1em solid ${props => props.theme.primaryText};
+        }
     }
 `;
 

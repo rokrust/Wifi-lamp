@@ -1,16 +1,21 @@
-import React, {Component} from 'react'
+import React, {Component, useReducer, useEffect, useState} from 'react'
 import styled from 'styled-components'
 import NavBar from './navbar'
 import NavButton from './navbutton'
 
+var buttonList = [];
 
 export class Header extends Component {
     render() {
+        console.log()
         return (
             <>
                 <NavBar>
-                    <NavButton to="/">test1</NavButton>
-                    <NavButton to="/">test2</NavButton>
+                {buttonList.map(buttonText => <NavButton key={buttonText} to={buttonText}>{buttonText}</NavButton>)}
+                {/*
+                <NavButton to="/">test1</NavButton>
+                <NavButton to="/">test2</NavButton>
+                */}
                 </NavBar>
                 <Banner>
                     {this.props.pageName}
@@ -21,8 +26,11 @@ export class Header extends Component {
     }
 }
 
-const withHeader = (WrappedComponent, pageName) => {
-    return class WithCounter extends Component
+const withHeader = (WrappedComponent, pageName, pageLink) => {
+    buttonList.push(pageLink || pageName);
+    console.log(buttonList);
+
+    return class WithHeader extends Component
     {
         render() {
             return (

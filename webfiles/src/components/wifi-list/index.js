@@ -12,7 +12,7 @@ export default class WifiApList extends Component {
     render() {
         return (
             <>
-                { this.sortedAp.map(ap => <WifiAp name={ap.name} signalStrength={ap.signalStrength}/>) }
+                { this.sortedAp.map(ap => <WifiAp key={ap.name} name={ap.name} signalStrength={ap.signalStrength}/>) }
             </>
         )
     }
