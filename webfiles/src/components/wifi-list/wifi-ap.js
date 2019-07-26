@@ -1,13 +1,15 @@
 import React, {Component} from 'react'
 import styled from 'styled-components'
 import WifiIcon from './wifi-icon'
+import posed from 'react-pose'
 
 export default class WifiAp extends Component {
     constructor(props) {
         super(props);
         this.state = {
             name: "",
-            signalStrength: 0
+            signalStrength: 0,
+            expanded: false
         }
     }
 
@@ -20,14 +22,30 @@ export default class WifiAp extends Component {
     
     render() {
         return (
-            <ApWrap key={this.state.name}>
-                <WifiName>{this.state.name}</WifiName>
-                <IconWrapper>
-                    <WifiIcon signalStrength={this.state.signalStrength} width="2.5em" height="2.5em"/>
-                </IconWrapper>
-            </ApWrap>
+            <ComponentWrap className="ap-element" onClick={() => this.setState({expanded: !this.state.expanded})}>
+                <ApWrap className="ap-wrapper" key={this.state.name} pose={this.state.expanded ? "expand" : "collapse"}>
+                    <WifiName>{this.state.name}</WifiName>
+                    <IconWrapper pose={this.state.expanded ? "fadeOut" : "fadeIn"}>
+                        <WifiIcon signalStrength={this.state.signalStrength} width="2.5em" height="2.5em"/>
+                    </IconWrapper>
+                </ApWrap>
+                <InputWrap pose={this.state.expanded ? "visible" : "hidden"}>
+                    <PasswordInput/>
+                </InputWrap>
+            </ComponentWrap>
         );
     }
+}
+
+const PasswordInput = () => {
+    return (
+        <>
+            <input type="text"/>
+            <SubmitButton type="submit">
+                Submit
+            </SubmitButton>
+        </>
+    )
 }
 
 /*<form style={{display: "flex", flexDirection: "row"}}>
@@ -35,16 +53,105 @@ export default class WifiAp extends Component {
     <input type="submit" />
 </form>*/
 
-const ApWrap = styled.div`
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+const expandProps = {
+    expand: {
+        height: "12em",
+        transition: {
+            type: "spring",
+            stiffness: 200,
+            damping: 15
+        }
+    },
+    collapse: {
+        height: "auto",
+        transition: {
+            type: "spring",
+            stiffness: 200,
+            damping: 15
+        }
+    }
+}
+
+const fadeProps = {
+    fadeIn: {
+        opacity: 1,
+        transition: {
+            delay: 150,
+            duration: 200
+        }
+    },
+
+    fadeOut: {
+        opacity: 0,
+    }
+}
+
+const passwordProps = {
+    visible: {
+        applyAtStart: {display: "block"},
+        opacity: 1,
+        transition: {
+            delay: 150,
+            duration: 200
+        }
+    },
+
+    hidden: {
+        applyAtStart: {display: "none"},
+        opacity: 0,
+    }
+}
+
+const ComponentWrap = styled.div`
+    position: relative;
+    display: "flex";
+    flex-direction: "column";
     padding: 0.5em 0em;
     border-style: solid;
     border-color: ${props => props.theme.secondaryDark};
     border-width: 0.1em;
-    display: flex;
     background-color: ${props => props.theme.secondary};
+`;
+
+const ApWrap = styled(posed.div(expandProps))`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+`;
+
+const IconWrapper = styled(posed.div(fadeProps))`
+    position: relative;
+    right: 1em;
+    top: 1.5em;
+`;
+
+const InputWrap = styled(posed.form(passwordProps))`
+    display: flex;
+    position: absolute;
+    justify-content: space-between;
+    padding: 2em;
+    bottom: 1em;
+`;
+
+const PasswordWrap = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+`;
+
+const SubmitButton = styled.button`
+    background-color: ${props => props.theme.secondaryDark};
+    border: none;
+    width: 8em;
+    height: 2em;
+    position: relative;
+    right: 2em;
+`;
+
+const Test = styled.div`
+    height: 100px;
+    background-color: red;
+    display: block;
 `;
 
 const WifiName = styled.p`
@@ -53,10 +160,4 @@ const WifiName = styled.p`
     position: relative;
     left: 0.3em;
     color: ${props => props.theme.secondaryText};
-`;
-
-const IconWrapper = styled.div`
-    align-self: center;
-    position: relative;
-    right: 1em;
 `;
