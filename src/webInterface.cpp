@@ -96,6 +96,10 @@ void WebInterface::setupServer()
     WiFi.softAP("Lamp Config");
 
 
+    server.on("/login", HTTP_POST, [this](){
+        Serial.println("Received password")
+    });
+
     server.on("/upload", HTTP_POST, [this](){
         String path = server.uri();
 

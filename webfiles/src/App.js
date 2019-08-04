@@ -37,9 +37,9 @@ function App() {
     <div className="App">
       <header className="App-header">
           <Switch>
-            <Route path='/' component={Wifi} />
             <Route exact path='/test1' component={Test1} />
             <Route exact path='/test2' component={Test2} />
+            <Route path='/' component={Wifi} />
           </Switch>
       </header>
     </div>

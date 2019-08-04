@@ -7,15 +7,10 @@ var buttonList = [];
 
 export class Header extends Component {
     render() {
-        console.log()
         return (
             <>
                 <NavBar>
-                {buttonList.map(buttonText => <NavButton key={buttonText} to={buttonText}>{buttonText}</NavButton>)}
-                {/*
-                <NavButton to="/">test1</NavButton>
-                <NavButton to="/">test2</NavButton>
-                */}
+                    {buttonList.map(buttonText => <NavButton key={buttonText} to={buttonText}>{buttonText}</NavButton>)}
                 </NavBar>
                 <Banner>
                     {this.props.pageName}

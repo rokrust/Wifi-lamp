@@ -22,29 +22,33 @@ export default class WifiAp extends Component {
     
     render() {
         return (
-            <ComponentWrap className="ap-element" onClick={() => this.setState({expanded: !this.state.expanded})}>
-                <ApWrap className="ap-wrapper" key={this.state.name} pose={this.state.expanded ? "expand" : "collapse"}>
+            <ComponentWrap className="ap-element" >
+                <ApWrap 
+                    className="ap-wrapper" 
+                    key={this.state.name} 
+                    onClick={() => this.setState({expanded: !this.state.expanded})} 
+                    pose={this.state.expanded ? "expand" : "collapse"}
+                >
                     <WifiName>{this.state.name}</WifiName>
                     <IconWrapper pose={this.state.expanded ? "fadeOut" : "fadeIn"}>
                         <WifiIcon signalStrength={this.state.signalStrength} width="2.5em" height="2.5em"/>
                     </IconWrapper>
                 </ApWrap>
-                <InputWrap pose={this.state.expanded ? "visible" : "hidden"}>
-                    <PasswordInput/>
-                </InputWrap>
+                <PasswordInput ssid={this.state.name} expanded={this.state.expanded}/>
             </ComponentWrap>
         );
     }
 }
 
-const PasswordInput = () => {
+const PasswordInput = (props) => {
     return (
-        <>
-            <input type="text"/>
+        < InputWrap action="/login" method="POST" pose={ props.expanded ? "visible" : "hidden" }>
+            <input type="hidden" name="ssid" value={props.ssid}/>
+            <input type="text" placeholder="Password"/>
             <SubmitButton type="submit">
                 Submit
             </SubmitButton>
-        </>
+        </InputWrap>
     )
 }
 
@@ -161,3 +165,4 @@ const WifiName = styled.p`
     left: 0.3em;
     color: ${props => props.theme.secondaryText};
 `;
+
