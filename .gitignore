@@ -6,3 +6,7 @@
 .vscode/launch.json
 .vscode/ipch
 node_modules
+data
+webfiles/build
+include/credentials.h
+.vscode
