@@ -97,7 +97,16 @@ void WebInterface::setupServer()
 
 
     server.on("/login", HTTP_POST, [this](){
-        Serial.println("Received password")
+        Serial.println("Received password");
+        Serial.println("SSID: " + server.arg("ssid"));
+
+        for(int i = 0; i < server.args(); i++)
+        {
+            Serial.println(server.argName(i) + ": " + server.arg(i));
+        }
+
+        server.sendHeader("Location", "/");
+        server.send(303);
     });
 
     server.on("/upload", HTTP_POST, [this](){
