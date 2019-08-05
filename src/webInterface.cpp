@@ -24,119 +24,14 @@ WebInterface::~WebInterface()
     client.disconnect();
 }
 
-
-String WebInterface::removePath(String url)
-{
-    for(int i = url.length() - 1; i > 0; i--)
-    {
-        if(url[i] == '/')
-        {
-            return url.substring(i);
-        }
-    }
-    return url;
-}
-
-String WebInterface::getContentType(String path)
-{
-    if(path.endsWith(".htm")) return "text/html";
-    else if(path.endsWith(".html")) return "text/html";
-    else if(path.endsWith(".css")) return "text/css";
-    else if(path.endsWith(".js")) return "application/javascript";
-    else if(path.endsWith(".png")) return "image/png";
-    else if(path.endsWith(".gif")) return "image/gif";
-    else if(path.endsWith(".jpg")) return "image/jpeg";
-    else if(path.endsWith(".ico")) return "image/x-icon";
-    else if(path.endsWith(".xml")) return "text/xml";
-    else if(path.endsWith(".pdf")) return "application/x-pdf";
-    else if(path.endsWith(".svg")) return "image/svg+xml";
-    else if(path.endsWith(".zip")) return "application/x-zip";
-    else if(path.endsWith(".gz")) return "application/x-gzip";
-    return "text/plain";
-}
-
-void WebInterface::uploadFile(String path)
-{
-    HTTPUpload& upload = server.upload();
-
-    if(upload.status == UPLOAD_FILE_START)
-    {
-        String filename = upload.filename;
-        if(!filename.startsWith("/")) filename = "/" + filename;
-
-        fileHandle = SPIFFS.open(filename, "w");
-    }
-    else if(upload.status == UPLOAD_FILE_WRITE)
-    {
-        if(fileHandle)
-        {
-            fileHandle.write(upload.buf, upload.currentSize);
-        }
-    }
-    else if(upload.status == UPLOAD_FILE_END)
-    {
-        if(fileHandle)
-        {
-            fileHandle.close();
-            server.sendHeader("Location", "/success.html"); //Redirect to success page
-            server.send(303);
-        }
-        else
-        {
-            server.send(500, "text/plain", "500: Could not create file");
-        }
-    }
-}
-
-void WebInterface::setupServer()
+void WebInterface::startServer()
 {
     ip = IPAddress(10, 0, 0, 10);
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Lamp Config");
 
-
-    server.on("/login", HTTP_POST, [this](){
-        Serial.println("Received password");
-        Serial.println("SSID: " + server.arg("ssid"));
-
-        for(int i = 0; i < server.args(); i++)
-        {
-            Serial.println(server.argName(i) + ": " + server.arg(i));
-        }
-
-        server.sendHeader("Location", "/");
-        server.send(303);
-    });
-
-    server.on("/upload", HTTP_POST, [this](){
-        String path = server.uri();
-
-        if(SPIFFS.exists(path))
-        {
-            uploadFile(path);
-        }
-
-        else
-        {
-            Serial.println("File " + path + " does not exist");
-        }
-    });
-
-    server.onNotFound([this](){
-        String path = removePath(server.uri());
-        path = "/build" + path;
-        if(path.endsWith("/")) path += "index.html";
-
-        String contentType = getContentType(path);
-        if(!SPIFFS.exists(path)) Serial.println("Requested file " + String(path) + " could not be found");
-
-        File file = SPIFFS.open(path, "r");
-        size_t size = server.streamFile(file, contentType);
-        file.close();
-    });
-
-    server.begin();
+    WebServer.begin();
 
 }
 

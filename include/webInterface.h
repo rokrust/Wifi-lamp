@@ -5,30 +5,25 @@
 #include <PubSubClient.h>
 #include <FS.h>
 #include "credentials.h"
+#include "webserver.h"
 
 class WebInterface
 {
     private:
         //For configuration through AP
-        ESP8266WebServer server;
         IPAddress ip;
+        WebServer _webServer;
 
         //For MQTT / communication
         WiFiClient espClient;
         PubSubClient client;
 
-        //SPIFFS file handling
-        File fileHandle;
-
-        String getContentType(String path);
-        void uploadFile(String path);
-        String removePath(String url);
-
     public:
         WebInterface();
         ~WebInterface();
 
-        void setupServer();
+        void startServer();
+
         void connectToWifi(WifiCredentials wifiAp);
         void connectToMqtt(MqttCredentials mqtt, String topic);
         void reconnectServices(Credentials credentials, String topic);
