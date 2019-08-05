@@ -18,7 +18,7 @@ WebInterface::WebInterface() : client(credentials.mqtt.name.c_str(), credentials
 
 WebInterface::~WebInterface()
 {
-    server.stop();
+    _webServer.stop();
     WiFi.disconnect();
     espClient.stop();
     client.disconnect();
@@ -31,7 +31,7 @@ void WebInterface::startServer()
     WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Lamp Config");
 
-    WebServer.begin();
+    _webServer.begin();
 
 }
 

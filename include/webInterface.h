@@ -29,5 +29,5 @@ class WebInterface
         void reconnectServices(Credentials credentials, String topic);
         
         void publish(char* topic, char* msg) { client.publish(topic, msg); }
-        void loop() { reconnectServices(credentials, "wifi-lamp"); client.loop(); server.handleClient();}
+        void loop() { reconnectServices(credentials, "wifi-lamp"); client.loop(); _webServer.loop();}
 };

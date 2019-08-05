@@ -23,7 +23,7 @@ void singleClick() {
 
 void doubleClick() {
   Serial.println("Event: Double click");
-  web.setupServer();
+  web.startServer();
 }
 
 void setup() {

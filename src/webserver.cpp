@@ -5,32 +5,34 @@ void WebServer::uploadFile(String path)
 {
     HTTPUpload& upload = server.upload();
 
-    if(upload.status == UPLOAD_FILE_START)
+    switch(upload.status)
     {
-        String filename = upload.filename;
-        if(!filename.startsWith("/")) filename = "/" + filename;
+        case UPLOAD_FILE_START:
+        {
+            String filename = upload.filename;
+            if (!filename.startsWith("/"))
+                filename = "/" + filename;
 
-        fileHandle = SPIFFS.open(filename, "w");
-    }
-    else if(upload.status == UPLOAD_FILE_WRITE)
-    {
-        if(fileHandle)
-        {
+            fileHandle = SPIFFS.open(filename, "w");
+            break;
+        }
+
+        case UPLOAD_FILE_WRITE:
             fileHandle.write(upload.buf, upload.currentSize);
-        }
-    }
-    else if(upload.status == UPLOAD_FILE_END)
-    {
-        if(fileHandle)
-        {
-            fileHandle.close();
-            server.sendHeader("Location", "/success.html"); //Redirect to success page
-            server.send(303);
-        }
-        else
-        {
-            server.send(500, "text/plain", "500: Could not create file");
-        }
+            break;
+
+        case UPLOAD_FILE_END:
+            if (fileHandle)
+            {
+                fileHandle.close();
+                server.sendHeader("Location", "/success.html"); //Redirect to success page
+                server.send(303);
+            }
+            else
+            {
+                server.send(500, "text/plain", "500: Could not create file");
+            }
+            break;
     }
 }
 

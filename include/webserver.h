@@ -19,7 +19,7 @@ class WebServer
     public:
         WebServer();
         void begin() { server.begin(); }
+        void stop() { server.stop(); }
 
-        void setup();
-        void loop();
+        void loop() { server.handleClient(); }
 };
