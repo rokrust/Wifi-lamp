@@ -1,7 +1,25 @@
 #include "button.h"
+#include "iot.h"
 #include "webInterface.h"
+#include "webservermodule.h"
 #include <Arduino.h>
 #include <FS.h>
+
+iot::IotDevice device;
+
+void setup()
+{
+  device.addModule(new WebServerModule());
+  device.setup();
+}
+
+void loop()
+{
+  device.loop();
+}
+
+/*
+iot::IotDevice device;
 
 const byte interruptPin = 13;
 volatile byte val = 255;
@@ -27,6 +45,10 @@ void doubleClick() {
 }
 
 void setup() {
+  device.addModule(new WebServerModule());
+  device.setup();
+
+
   delay(3000);
   Serial.begin(9600);
   if(!SPIFFS.begin())
@@ -40,6 +62,8 @@ void setup() {
 }
 
 void loop() {
+  device.loop();
   web.loop();
   
 }
+*/

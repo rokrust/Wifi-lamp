@@ -1,106 +1,84 @@
+#pragma once
+
 #include <vector>
 #include <string>
 #include <map>
 #include <queue>
+#include <functional>
+#include <utility>
 
 
 namespace iot 
 {
     using namespace std;
-    class Iot;
-    class NetworkModule;
 
     class Message
     {
         public:
-            static const unsigned int id = 0;
-            virtual unsigned int getId() { return Message::id; }
+        static const unsigned int id = 0;
+        virtual unsigned int getId() const = 0;
+        virtual ~Message() = 0;
     };
+
+
+
 
     class NetworkModule
     {
         private:
-            friend void IotDevice::addModule(NetworkModule* module);
         
         public:
-            void setDevice(IotDevice* device);
             virtual void setup() = 0;
             virtual void loop() = 0;
+            virtual ~NetworkModule() {}
 
             void unsubscribe(unsigned int id);
-            void subscribe(unsigned int id) { IotDevice::_subscriptionMap[id] = this; }
-            void subscribe(const Message& message) { subscribe(message.getId()); }
-        //    void send(Message message) { _device->broadCastMessage(message); }
-            void receive(const Message& message);
+            void subscribe(const unsigned int id, function<void(Message*)> callback);
+            void subscribe(Message *message, function<void(Message*)>& callback);
+            void send(Message* message);
     };
+
+
+
+
+    typedef pair<NetworkModule *, function<void(Message*)>> CallbackPair_t;
+    typedef std::map<unsigned int, vector<CallbackPair_t>> SubscriptionMap_t; //messy but effective
 
     class IotDevice
     {
-        friend void NetworkModule::receive(const Message& message);
-        friend void NetworkModule::unsubscribe(unsigned int id);
-        friend void NetworkModule::subscribe(unsigned int id);
+        friend class NetworkModule;
 
         private:
-            static map<unsigned int, vector<NetworkModule*>> _subscriptionMap;
-            static queue<Message> _messageQueue;
+            //Message id's are used as keys, while the values contain callback functions and the accompanying NetworkModule instance
+            static SubscriptionMap_t _subscriptionMap;
+
+            //Messages are sent to this queue and broadcast to all subscribed modules
+            static queue<Message* > _messageQueue;
             vector<NetworkModule*> _modules;
 
         public:
-            void setup()
-            {
-                for (int i = 0; i < _modules.size(); i++)
-                {
-                    _modules[i]->setup();
-                }
-            }
+            void setup();
+            void loop();
+            void addModule(NetworkModule* module);
+            void removeModule(NetworkModule* module);
+            void broadCastMessage(Message* message);
 
-            void loop()
-            {
-                while(!_messageQueue.empty())
-                {
-                    broadCastMessage(_messageQueue.front());
-                    _messageQueue.pop();
-                }
-
-                for (int i = 0; i < _modules.size(); i++)
-                {
-                    _modules[i]->loop();
-                }
-            }
-
-            void addModule(NetworkModule* module)
-            {
-                _modules.push_back(module);
-            }
-
-
-            void broadCastMessage(const Message& message)
-            {
-                for(int i = 0; i < _subscriptionMap[message.id].size(); i++)
-                {
-                    _subscriptionMap[message.id][i]->receive(message);
-                }
-            }
-
+            ~IotDevice();
     };
 
 
-    class TestMessage : public Message
+    /*class TestMessage : public Message
     {
         public:
             static const unsigned int id = 1;
             TestMessage() { }
     };
-    //NewMessage() : Message(id) {}
 
     class TestModule : NetworkModule
     {
         private:
         public:
             void setup() {}
-            void loop() { subscribe(TestMessage::id); }
-    }test;
-    
-    map<unsigned int, vector<NetworkModule*>> IotDevice::_subscriptionMap;
-    queue<Message> IotDevice::_messageQueue;
+            void loop() { subscribe(TestMessage::id, [](){}); }//empty callback
+    }test;*/
 }
