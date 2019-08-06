@@ -7,10 +7,11 @@
 namespace iot
 {
     using namespace std;
-    SubscriptionMap_t _subscriptionMap;
-    queue<Message*> _messageQueue;
+    SubscriptionMap_t IotDevice::_subscriptionMap;
+    queue<Message *> IotDevice::_messageQueue;
+    const unsigned int Message::id;
 
-    void NetworkModule::send(Message* message) { _messageQueue.push(message); }
+    void NetworkModule::send(Message* message) { IotDevice::_messageQueue.push(message); }
     void NetworkModule::subscribe(const unsigned int id, function<void(Message*)> callback)
     {
         if (IotDevice::_subscriptionMap.find(id) == IotDevice::_subscriptionMap.end())

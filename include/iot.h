@@ -16,7 +16,7 @@ namespace iot
     {
         public:
         static const unsigned int id = 0;
-        virtual unsigned int getId() const = 0;
+        virtual unsigned int getId() { return Message::id; };
         virtual ~Message() = 0;
     };
 
