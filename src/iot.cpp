@@ -12,7 +12,9 @@ namespace iot
     const unsigned int Message::id;
 
     void NetworkModule::send(Message* message) { IotDevice::_messageQueue.push(message); }
-    void NetworkModule::subscribe(const unsigned int id, function<void(Message*)> callback)
+
+    template<typename CallbackFunction>
+    void NetworkModule::subscribe(const unsigned int id, CallbackFunction callback)
     {
         if (IotDevice::_subscriptionMap.find(id) == IotDevice::_subscriptionMap.end())
         {
@@ -22,7 +24,8 @@ namespace iot
         IotDevice::_subscriptionMap[id].push_back(make_pair(this, callback)); 
     }
 
-    void NetworkModule::subscribe(Message *message, function<void(Message*)>& callback)
+    template<typename CallbackFunction>
+    void NetworkModule::subscribe(Message *message, CallbackFunction callback)
     { 
         subscribe(message->getId(), callback); 
     }
@@ -89,6 +92,12 @@ namespace iot
         for(int i = 0; i < _modules.size(); i++)
         {
             delete _modules[i];
+        }
+
+        for(int i = 0; i < _messageQueue.size(); i++)
+        {
+            delete _messageQueue.front();
+            _messageQueue.pop();
         }
     }
 }

@@ -31,11 +31,14 @@ namespace iot
             virtual void setup() = 0;
             virtual void loop() = 0;
             virtual ~NetworkModule() {}
-
-            void unsubscribe(unsigned int id);
-            void subscribe(const unsigned int id, function<void(Message*)> callback);
-            void subscribe(Message *message, function<void(Message*)>& callback);
             void send(Message* message);
+            void unsubscribe(unsigned int id);
+
+            template<typename CallbackFunction>
+            void subscribe(const unsigned int id, CallbackFunction callback);
+
+            template<typename CallbackFunction>
+            void subscribe(Message *message, CallbackFunction callback);
     };
 
 
