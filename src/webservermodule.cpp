@@ -90,7 +90,7 @@ void WebServerModule::onWifiCredentialsReceived()
         Serial.println(server.argName(i) + ": " + server.arg(i));
     }
 
-    send(new Message{ .ssid = server.arg(0), .password = server.arg(1) });
+    send(new WifiInfo(server.arg(0), server.arg(1)));
     server.sendHeader("Location", "/");
     server.send(303);
 }
@@ -118,18 +118,33 @@ void WebServerModule::onResourceRequested()
 
 void WebServerModule::setup()
 {
+    IPAddress ip = IPAddress(10, 0, 0, 10);
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
+    WiFi.softAP("Lamp Config");
+
+    if (!SPIFFS.begin())
+    {
+        Serial.println("Could not mount");
+    }
+
+    Serial.println("\tWebserver module");
     server.on("/login", HTTP_POST, [this](){
+        Serial.println("Posted to /login");
         onWifiCredentialsReceived();
     });
 
     server.on("/upload", HTTP_POST, [this](){
+        Serial.println("Downloading file");
         onFileUpload();
     });
 
-    server.onNotFound([this](){
+    server.onNotFound([this]() {
+        Serial.println("Resource requested");
         onResourceRequested();
     });
 
+    server.begin();
 }
 
 void WebServerModule::loop()

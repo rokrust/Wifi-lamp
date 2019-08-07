@@ -12,7 +12,7 @@ class WebInterface
     private:
         //For configuration through AP
         IPAddress ip;
-        WebServer _webServer;
+        //WebServer _webServer;
 
         //For MQTT / communication
         WiFiClient espClient;
@@ -29,5 +29,5 @@ class WebInterface
         void reconnectServices(Credentials credentials, String topic);
         
         void publish(char* topic, char* msg) { client.publish(topic, msg); }
-        void loop() { reconnectServices(credentials, "wifi-lamp"); client.loop(); _webServer.loop();}
+        void loop() { reconnectServices(credentials, "wifi-lamp"); client.loop(); /*_webServer.loop();*/}
 };

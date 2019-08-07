@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <queue>
+#include <Arduino.h>
 #include "iot.h"
 
 namespace iot
@@ -11,7 +12,9 @@ namespace iot
     queue<Message *> IotDevice::_messageQueue;
     const unsigned int Message::id;
 
-    void NetworkModule::send(Message* message) { IotDevice::_messageQueue.push(message); }
+    Message::~Message() {}
+
+    void NetworkModule::send(Message* message) { Serial.println("Sending message: " + message->getId()); IotDevice::_messageQueue.push(message); }
 
     template<typename CallbackFunction>
     void NetworkModule::subscribe(const unsigned int id, CallbackFunction callback)
@@ -50,6 +53,7 @@ namespace iot
     {
         for (int i = 0; i < _modules.size(); i++)
         {
+            Serial.println("Setting up module");
             _modules[i]->setup();
         }
     }
@@ -72,6 +76,7 @@ namespace iot
     void IotDevice::addModule(NetworkModule *module)
     {
         _modules.push_back(module);
+        Serial.println("Module added" + _modules.size());
     }
 
     void IotDevice::removeModule(NetworkModule *module)

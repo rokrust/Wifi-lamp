@@ -1,13 +1,17 @@
+#pragma once
+
 #include "iot.h"
 #include "string"
+#include <Arduino.h>
 
 struct WifiInfo : public iot::Message
 {
     //data fields
-    std::string ssid;
-    std::string password;
+    String ssid;
+    String password;
 
     static const unsigned int id = 1;
     unsigned int getId() { return WifiInfo::id; }
-    WifiInfo(std::string ssid, std::string password) : ssid(ssid), password(password) {}
+    WifiInfo(String ssid, String password) : ssid(ssid), password(password) {}
+    ~WifiInfo() {}
 };
