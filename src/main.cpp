@@ -3,6 +3,7 @@
 #include "credentials.h"
 //#include "webInterface.h"
 #include "webservermodule.h"
+#include "wifimodule.h"
 #include <ESP8266WiFi.h>
 #include <Arduino.h>
 
@@ -37,19 +38,10 @@ void setup() {
   Serial.begin(9600);
 
   device.addModule(new WebServerModule());
+  device.addModule(new WifiModule());
   device.setup();
 }
 
 void loop() {
-  if (!WiFi.isConnected())
-  {
-    //Serial.println("Wifi not connected");
-    WiFi.begin(credentials.wifi.ssid, credentials.wifi.password);
-  }
-  //else
-  //{
-    //Serial.println("Wifi connected");
-  //}
   device.loop();
-
 }

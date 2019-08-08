@@ -118,11 +118,6 @@ void WebServerModule::onResourceRequested()
 
 void WebServerModule::setup()
 {
-    IPAddress ip = IPAddress(10, 0, 0, 10);
-    WiFi.mode(WIFI_AP_STA);
-    WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
-    WiFi.softAP("Lamp Config");
-
     if (!SPIFFS.begin())
     {
         Serial.println("Could not mount");
