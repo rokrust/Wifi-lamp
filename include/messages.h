@@ -15,3 +15,15 @@ struct WifiInfo : public iot::Message
     WifiInfo(String ssid, String password) : ssid(ssid), password(password) {}
     ~WifiInfo() {}
 };
+
+struct WifiInfo : public iot::Message
+{
+    //data fields
+    String ssid;
+    String password;
+
+    static const unsigned int id = 2;
+    unsigned int getId() { return WifiInfo::id; }
+    WifiInfo(String ssid, String password) : ssid(ssid), password(password) {}
+    ~WifiInfo() {}
+};

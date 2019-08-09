@@ -4,6 +4,7 @@
 //#include "webInterface.h"
 #include "webservermodule.h"
 #include "wifimodule.h"
+#include "buttonmodule.h"
 #include <ESP8266WiFi.h>
 #include <Arduino.h>
 
@@ -39,6 +40,8 @@ void setup() {
 
   device.addModule(new WebServerModule());
   device.addModule(new WifiModule());
+  device.addModule(new ButtonModule());
+  
   device.setup();
 }
 

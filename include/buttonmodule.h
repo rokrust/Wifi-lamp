@@ -8,7 +8,7 @@ class ButtonModule : public iot::NetworkModule
         std::vector<Button> buttonList;
 
     public:
-        void addButton(Button button);
+        void addButton(const Button& button);
         void setup();
         void loop();
 };
