@@ -68,19 +68,20 @@ namespace iot
             ~IotDevice();
     };
 
-
-    /*class TestMessage : public Message
+    template <typename CallbackFunction>
+    void NetworkModule::subscribe(const unsigned int id, CallbackFunction callback)
     {
-        public:
-            static const unsigned int id = 1;
-            TestMessage() { }
-    };
+        if (IotDevice::_subscriptionMap.find(id) == IotDevice::_subscriptionMap.end())
+        {
+            IotDevice::_subscriptionMap[id] = std::vector<CallbackPair_t>();
+        }
 
-    class TestModule : NetworkModule
+        IotDevice::_subscriptionMap[id].push_back(make_pair(this, callback));
+    }
+
+    template <typename CallbackFunction>
+    void NetworkModule::subscribe(Message *message, CallbackFunction callback)
     {
-        private:
-        public:
-            void setup() {}
-            void loop() { subscribe(TestMessage::id, [](){}); }//empty callback
-    }test;*/
+        subscribe(message->getId(), callback);
+    }
 }

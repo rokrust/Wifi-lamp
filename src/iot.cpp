@@ -16,6 +16,7 @@ namespace iot
 
     void NetworkModule::send(Message* message) { Serial.println("Sending message: " + message->getId()); IotDevice::_messageQueue.push(message); }
 
+/*
     template<typename CallbackFunction>
     void NetworkModule::subscribe(const unsigned int id, CallbackFunction callback)
     {
@@ -32,6 +33,7 @@ namespace iot
     { 
         subscribe(message->getId(), callback); 
     }
+*/
 
     void NetworkModule::unsubscribe(unsigned int id) 
     {
