@@ -21,7 +21,6 @@ namespace iot
     };
 
 
-
     class NetworkModule
     {
         private:
@@ -31,29 +30,15 @@ namespace iot
             virtual void loop() = 0;
             virtual ~NetworkModule() {}
             void send(Message* message);
-            void unsubscribe(unsigned int id);
-
-            template<typename CallbackFunction>
-            void subscribe(const unsigned int id, CallbackFunction callback);
-
-            template<typename CallbackFunction>
-            void subscribe(Message *message, CallbackFunction callback);
+            void receive(Message* message) {Serial.println("Module has not subscribed to message " + message->getId());}
     };
 
-
-
-
-    typedef pair<NetworkModule *, function<void(Message*)>> CallbackPair_t;
-    typedef std::map<unsigned int, vector<CallbackPair_t>> SubscriptionMap_t; //messy but effective
 
     class IotDevice
     {
         friend class NetworkModule;
 
         private:
-            //Message id's are used as keys, while the values contain callback functions and the accompanying NetworkModule instance
-            static SubscriptionMap_t _subscriptionMap;
-
             //Messages are sent to this queue and broadcast to all subscribed modules
             static queue<Message* > _messageQueue;
             vector<NetworkModule*> _modules;
@@ -67,21 +52,4 @@ namespace iot
 
             ~IotDevice();
     };
-
-    template <typename CallbackFunction>
-    void NetworkModule::subscribe(const unsigned int id, CallbackFunction callback)
-    {
-        if (IotDevice::_subscriptionMap.find(id) == IotDevice::_subscriptionMap.end())
-        {
-            IotDevice::_subscriptionMap[id] = std::vector<CallbackPair_t>();
-        }
-
-        IotDevice::_subscriptionMap[id].push_back(make_pair(this, callback));
-    }
-
-    template <typename CallbackFunction>
-    void NetworkModule::subscribe(Message *message, CallbackFunction callback)
-    {
-        subscribe(message->getId(), callback);
-    }
 }

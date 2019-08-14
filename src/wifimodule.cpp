@@ -23,16 +23,13 @@ void WifiModule::setup()
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Lamp Config");
+}
 
-    subscribe(WifiInfo::id, test);
-    /*
-    subscribe(WifiInfo::id, [this](WifiInfo* message){
-        credentials.ssid = message->ssid;
-        credentials.password = message->password;
-
-        hasCredentials = true;
-    });
-    */
+void WifiModule::receive(iot::WifiInfo message)
+{
+    Serial.println("Received message: " + message->getId());
+    Serial.println("SSID: " + message->ssid);
+    Serial.println("Password: " + message->password);
 }
 
 void WifiModule::loop()

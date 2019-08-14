@@ -8,48 +8,12 @@
 namespace iot
 {
     using namespace std;
-    SubscriptionMap_t IotDevice::_subscriptionMap;
     queue<Message *> IotDevice::_messageQueue;
     const unsigned int Message::id;
 
     Message::~Message() {}
 
     void NetworkModule::send(Message* message) { Serial.println("Sending message: " + message->getId()); IotDevice::_messageQueue.push(message); }
-
-/*
-    template<typename CallbackFunction>
-    void NetworkModule::subscribe(const unsigned int id, CallbackFunction callback)
-    {
-        if (IotDevice::_subscriptionMap.find(id) == IotDevice::_subscriptionMap.end())
-        {
-            IotDevice::_subscriptionMap[id] = std::vector<CallbackPair_t>();
-        }
-
-        IotDevice::_subscriptionMap[id].push_back(make_pair(this, callback)); 
-    }
-
-    template<typename CallbackFunction>
-    void NetworkModule::subscribe(Message *message, CallbackFunction callback)
-    { 
-        subscribe(message->getId(), callback); 
-    }
-*/
-
-    void NetworkModule::unsubscribe(unsigned int id) 
-    {
-        for (int i = 0; i < IotDevice::_subscriptionMap[id].size(); i++)
-        {
-            if (IotDevice::_subscriptionMap[id][i].first == this)
-            {
-                IotDevice::_subscriptionMap[id].erase(IotDevice::_subscriptionMap[id].begin() + i);
-            }
-        }
-
-        if(IotDevice::_subscriptionMap[id].empty())
-        {
-            IotDevice::_subscriptionMap.erase(id);
-        }
-    }
 
     void IotDevice::setup()
     {
@@ -64,8 +28,13 @@ namespace iot
     {
         while (!_messageQueue.empty())
         {
-            broadCastMessage(_messageQueue.front());
-            delete _messageQueue.front();
+            Message* message = _messageQueue.front();
+            for(int i = 0; i < _modules.size(); i++)
+            {
+                _modules[i]->receive(message);
+            }
+
+            delete message;
             _messageQueue.pop();
         }
 
@@ -83,14 +52,10 @@ namespace iot
 
     void IotDevice::removeModule(NetworkModule *module)
     {
-
-    }
-
-    void IotDevice::broadCastMessage(Message* message)
-    {
-        for (int i = 0; i < _subscriptionMap[message->id].size(); i++)
+        for(int i = 0; i < _modules.size(); i++)
         {
-            _subscriptionMap[message->id][i].second(message);
+            if(_modules[i] == module)
+                _modules.remove(i);
         }
     }
 
