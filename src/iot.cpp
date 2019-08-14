@@ -55,7 +55,7 @@ namespace iot
         for(int i = 0; i < _modules.size(); i++)
         {
             if(_modules[i] == module)
-                _modules.remove(i);
+                _modules.erase(_modules.begin() + i);
         }
     }
 

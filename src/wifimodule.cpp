@@ -25,7 +25,7 @@ void WifiModule::setup()
     WiFi.softAP("Lamp Config");
 }
 
-void WifiModule::receive(iot::WifiInfo message)
+void WifiModule::receive(WifiInfo* message)
 {
     Serial.println("Received message: " + message->getId());
     Serial.println("SSID: " + message->ssid);

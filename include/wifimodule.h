@@ -17,5 +17,5 @@ public:
     void setup();
     void loop();
 
-    void receive(iot::WifiInfo message);
+    void receive(WifiInfo* message);
 };

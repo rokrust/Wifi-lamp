@@ -6,6 +6,7 @@
 #include <queue>
 #include <functional>
 #include <utility>
+#include <Arduino.h>
 
 
 namespace iot 
