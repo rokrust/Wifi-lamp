@@ -13,7 +13,12 @@ namespace iot
 
     Message::~Message() {}
 
-    void NetworkModule::send(Message* message) { Serial.println("Sending message: " + message->getId()); IotDevice::_messageQueue.push(message); }
+    void NetworkModule::send(Message* message) 
+    {
+        Serial.print("Sending message: ");
+        Serial.println(message->getId());
+        IotDevice::_messageQueue.push(message); 
+    }
 
     void IotDevice::setup()
     {
@@ -31,7 +36,7 @@ namespace iot
             Message* message = _messageQueue.front();
             for(int i = 0; i < _modules.size(); i++)
             {
-                _modules[i]->receive(message);
+                _modules[i]->receive(message->clone());
             }
 
             delete message;

@@ -15,6 +15,8 @@ struct WifiInfo : public iot::Message
     unsigned int getId() { return WifiInfo::id; }
     WifiInfo(String ssid, String password) : ssid(ssid), password(password) {}
     ~WifiInfo() {}
+
+    WifiInfo* clone() { return this; }
 };
 
 struct ButtonEvent : public iot::Message
@@ -24,5 +26,7 @@ struct ButtonEvent : public iot::Message
     State clickType;
 
     static const unsigned int id = 2;
-    unsigned int getId() { return WifiInfo::id; }
+    unsigned int getId() { return ButtonEvent::id; }
+
+    ButtonEvent* clone() { return this; }
 };

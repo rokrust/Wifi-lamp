@@ -18,6 +18,7 @@ namespace iot
         public:
         static const unsigned int id = 0;
         virtual unsigned int getId() { return Message::id; };
+        virtual Message* clone() = 0;
         virtual ~Message() = 0;
     };
 
@@ -31,7 +32,7 @@ namespace iot
             virtual void loop() = 0;
             virtual ~NetworkModule() {}
             void send(Message* message);
-            void receive(Message* message) {Serial.println("Module has not subscribed to message " + message->getId());}
+            virtual void receive(Message* message) {Serial.println("Module has not subscribed to message " + message->getId());}
     };
 
 
