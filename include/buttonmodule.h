@@ -11,4 +11,5 @@ class ButtonModule : public iot::NetworkModule
         void addButton(const Button& button);
         void setup();
         void loop();
+        ButtonModule* clone() { return this; }
 };

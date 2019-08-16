@@ -36,7 +36,7 @@ namespace iot
             Message* message = _messageQueue.front();
             for(int i = 0; i < _modules.size(); i++)
             {
-                _modules[i]->receive(message->clone());
+                (_modules[i]->clone())->receive(message->clone());
             }
 
             delete message;

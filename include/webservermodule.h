@@ -24,5 +24,6 @@ class WebServerModule : public iot::NetworkModule
     public:
         void setup();
         void loop();
+        WebServerModule* clone() { return this; }
 
 };

@@ -16,6 +16,7 @@ private:
 public:
     void setup();
     void loop();
+    WifiModule* clone() { return this; }
 
-    void receive(iot::Message* message);
+    void receive(WifiInfo* message);
 };

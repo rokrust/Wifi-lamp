@@ -16,7 +16,7 @@ struct WifiInfo : public iot::Message
     WifiInfo(String ssid, String password) : ssid(ssid), password(password) {}
     ~WifiInfo() {}
 
-    WifiInfo* clone() { return this; }
+    WifiInfo* clone() { return new WifiInfo(*this); }
 };
 
 struct ButtonEvent : public iot::Message

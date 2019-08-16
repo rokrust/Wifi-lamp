@@ -4,10 +4,10 @@
 
 void WifiModule::connectWifi()
 {
-    if (!WiFi.isConnected() && hasCredentials)
+    /*if (!WiFi.isConnected() && hasCredentials)
     {
         WiFi.begin(credentials.ssid, credentials.password);
-    }
+    }*/
 }
 
 void test(WifiInfo* msg)
@@ -19,19 +19,20 @@ void test(WifiInfo* msg)
 
 void WifiModule::setup()
 {
-    IPAddress ip = IPAddress(10, 0, 0, 10);
+    IPAddress ip = IPAddress(10, 0, 0, 13);
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Lamp Config");
 }
 
-void WifiModule::receive(iot::Message* msg)
+void WifiModule::receive(WifiInfo* msg)
 {
-    Serial.println("Received message: " + msg->getId());
-    WifiInfo* message = static_cast<WifiInfo* >(msg);
-    Serial.println("Received message: " + message->getId());
-    Serial.println("SSID: " + message->ssid);
-    Serial.println("Password: " + message->password);
+    Serial.print("Received message: ");
+    Serial.println(msg->getId());
+    Serial.print("SSID: ");
+    Serial.println(msg->ssid);
+    Serial.print("Password: ");
+    Serial.println(msg->password);
 }
 
 void WifiModule::loop()

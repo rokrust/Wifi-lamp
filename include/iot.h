@@ -30,9 +30,10 @@ namespace iot
         public:
             virtual void setup() = 0;
             virtual void loop() = 0;
+            virtual NetworkModule* clone() = 0;
             virtual ~NetworkModule() {}
             void send(Message* message);
-            virtual void receive(Message* message) {Serial.println("Module has not subscribed to message " + message->getId());}
+            void receive(Message* message) {Serial.println("Module has not subscribed to message " + message->getId());}
     };
 
 
