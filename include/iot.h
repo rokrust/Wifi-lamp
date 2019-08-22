@@ -1,5 +1,7 @@
 #pragma once
 
+#include "broadcaster.h"
+
 #include <vector>
 #include <string>
 #include <map>
@@ -25,25 +27,27 @@ namespace iot
 
     class NetworkModule
     {
-        private:
-        
+
         public:
             virtual void setup() = 0;
             virtual void loop() = 0;
             virtual NetworkModule* clone() = 0;
             virtual ~NetworkModule() {}
-            void send(Message* message);
+
+            template <class Callback> void subscribe(Callback callback) { IotDevice::_broadCaster.subscribe(callback); }
+            template <class Msg> void send(Msg *message) { IotDevice::_broadCaster.send(message); };
             void receive(Message* message) {Serial.println("Module has not subscribed to message " + message->getId());}
     };
 
-
+    template<class ...Msg_t>
     class IotDevice
     {
         friend class NetworkModule;
 
         private:
             //Messages are sent to this queue and broadcast to all subscribed modules
-            static queue<Message* > _messageQueue;
+            static queue<Message*> _messageQueue;
+            static BroadCaster<Msg_t...> _broadCaster;
             vector<NetworkModule*> _modules;
 
         public:
@@ -55,4 +59,10 @@ namespace iot
 
             ~IotDevice();
     };
+
+    template<typename ...Msg_t> 
+    BroadCaster<Msg_t...> IotDevice<Msg_t...>::_broadCaster;
+
+    template<typename ...Msg_t>
+    queue<Message *> IotDevice<Msg_t...>::_messageQueue;
 }

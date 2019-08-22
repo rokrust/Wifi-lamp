@@ -8,7 +8,6 @@
 namespace iot
 {
     using namespace std;
-    queue<Message *> IotDevice::_messageQueue;
     const unsigned int Message::id;
 
     Message::~Message() {}

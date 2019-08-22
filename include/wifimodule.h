@@ -18,5 +18,6 @@ public:
     void loop();
     WifiModule* clone() { return this; }
 
+
     void receive(WifiInfo* message);
 };
