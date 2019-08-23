@@ -31,13 +31,26 @@ namespace iot
         public:
             virtual void setup() = 0;
             virtual void loop() = 0;
-            virtual NetworkModule* clone() = 0;
-            virtual ~NetworkModule() {}
 
             template <class Callback> void subscribe(Callback callback) { IotDevice::_broadCaster.subscribe(callback); }
             template <class Msg> void send(Msg *message) { IotDevice::_broadCaster.send(message); };
-            void receive(Message* message) {Serial.println("Module has not subscribed to message " + message->getId());}
     };
+
+    template<class modules_t>
+    class ModulePack
+    {
+        private:
+            vector<NetworkModule*> _modules;
+
+        public:
+            ModulePack() { _modules = { new modules_t... }; }
+
+            void setup();
+            void loop();
+
+            void removeModule(NetworkModule* module);
+            void addModule(NetworkModule* module);
+    }
 
     template<class ...Msg_t>
     class IotDevice
@@ -48,7 +61,7 @@ namespace iot
             //Messages are sent to this queue and broadcast to all subscribed modules
             static queue<Message*> _messageQueue;
             static BroadCaster<Msg_t...> _broadCaster;
-            vector<NetworkModule*> _modules;
+            ModulePack _modules;
 
         public:
             void setup();
