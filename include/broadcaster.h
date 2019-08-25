@@ -14,7 +14,7 @@ namespace iot{
 
         public:
             void subscribe(callback receiveMsg) { callbacks.push_back(callback); }
-            void send(Msg_t message) { for(auto f : callbacks) callbacks[i](message); }
+            void send(Msg_t message) { for(auto f : callbacks) f(message); }
     };
 
     template<class ...Channels_t>

@@ -36,7 +36,7 @@ namespace iot
             template <class Msg> void send(Msg *message) { IotDevice::_broadCaster.send(message); };
     };
 
-    template<class modules_t>
+    template<class ...modules_t>
     class ModulePack
     {
         private:
@@ -50,9 +50,8 @@ namespace iot
 
             void removeModule(NetworkModule* module);
             void addModule(NetworkModule* module);
-    }
+    };
 
-    template<class ...Msg_t>
     class IotDevice
     {
         friend class NetworkModule;
@@ -60,10 +59,13 @@ namespace iot
         private:
             //Messages are sent to this queue and broadcast to all subscribed modules
             static queue<Message*> _messageQueue;
-            static BroadCaster<Msg_t...> _broadCaster;
-            ModulePack _modules;
+            template<typename ...msg_t> static BroadCaster<msg_t...> _broadCaster;
+            template <typename ...module_t> static ModulePack<module_t...> _modules;
 
         public:
+            template<typename modules, typename messages>
+            IotDevice(modules modulePack, messages messagePack);
+
             void setup();
             void loop();
             void addModule(NetworkModule* module);
@@ -73,9 +75,9 @@ namespace iot
             ~IotDevice();
     };
 
-    template<typename ...Msg_t> 
-    BroadCaster<Msg_t...> IotDevice<Msg_t...>::_broadCaster;
+    template <typename... Msg_t>
+    class IotDevice::_broadCaster<Msg_t...> { };
 
-    template<typename ...Msg_t>
-    queue<Message *> IotDevice<Msg_t...>::_messageQueue;
+    template <typename... Module_t>
+    class IotDevice::_modules<Module_t...> { };
 }
