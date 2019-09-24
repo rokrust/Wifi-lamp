@@ -3,6 +3,8 @@
 #include <map>
 #include <queue>
 #include <Arduino.h>
+#include <type_traits>
+
 #include "iot.h"
 
 namespace iot
@@ -12,14 +14,16 @@ namespace iot
 
     Message::~Message() {}
 
-    void NetworkModule::send(Message* message) 
+    /*
+    void Module::send(Message* message) 
     {
         Serial.print("Sending message: ");
         Serial.println(message->getId());
         IotDevice::_messageQueue.push(message); 
     }
-
-    void ModulePack::setup()
+    */
+    template <class... modules_t>
+    void ModulePack<modules_t...>::setup()
     {
         for (int i = 0; i < _modules.size(); i++)
         {
@@ -28,7 +32,8 @@ namespace iot
         }
     }
 
-    void ModulePack::loop()
+    template <typename... modules_t>
+    void ModulePack<modules_t...>::loop()
     {
         for (int i = 0; i < _modules.size(); i++)
         {
@@ -36,13 +41,15 @@ namespace iot
         }
     }
 
-    void ModulePack::addModule(NetworkModule *module)
+    template <class... modules_t>
+    void ModulePack<modules_t...>::addModule(Module *module)
     {
         _modules.push_back(module);
         Serial.println("Module added" + _modules.size());
     }
 
-    void ModulePack::removeModule(NetworkModule *module)
+    template <class... modules_t>
+    void ModulePack<modules_t...>::removeModule(Module *module)
     {
         for(int i = 0; i < _modules.size(); i++)
         {
@@ -51,8 +58,10 @@ namespace iot
         }
     }
 
-    void IotDevice::loop()
+    template <typename modulePack_t, typename broadCaster_t>
+    void IotDevice<modulePack_t, broadCaster_t>::loop()
     {
+        /*
         while (!_messageQueue.empty())
         {
             Message* message = _messageQueue.front();
@@ -66,14 +75,25 @@ namespace iot
         }
 
         _modules.loop();
+        */
     }
 
-    IotDevice::~IotDevice()
+    template <typename modulePack_t, typename broadCaster_t>
+    IotDevice<modulePack_t, broadCaster_t>::~IotDevice()
     {
+        /*
         for(int i = 0; i < _messageQueue.size(); i++)
         {
             delete _messageQueue.front();
             _messageQueue.pop();
         }
+        */
+    }
+
+    template <typename modulePack_t, typename broadCaster_t>
+    IotDevice<modulePack_t, broadCaster_t>::IotDevice(modulePack_t modules, broadCaster_t broadcaster)
+    {
+        _broadCaster = broadcaster;
+        _modules = modules;
     }
 }

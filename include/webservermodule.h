@@ -8,7 +8,7 @@
 #include <FS.h>
 
 
-class WebServerModule : public iot::NetworkModule
+class WebServerModule : public iot::Module
 {
     private:
         ESP8266WebServer server;

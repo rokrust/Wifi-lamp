@@ -5,7 +5,7 @@
 #include "credentials.h"
 #include <Arduino.h>
 
-class WifiModule : public iot::NetworkModule
+class WifiModule : public iot::Module
 {
 private:
     WifiCredentials credentials;

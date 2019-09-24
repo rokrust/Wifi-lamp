@@ -2,7 +2,7 @@
 #include "button.h"
 #include <vector>
 
-class ButtonModule : public iot::NetworkModule
+class ButtonModule : public iot::Module
 {
     private:
         std::vector<Button> buttonList;
