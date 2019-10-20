@@ -15,13 +15,18 @@ namespace iot{
         public:
             void subscribe(callback receiveMsg) { callbacks.push_back(receiveMsg); }
             void send(Msg_t message) { for(auto f : callbacks) f(message); }
+
+
     };
 
-    template<class ...Channels_t>
-    class BroadCaster : Channel<Channels_t>...
+    template<class ...messages>
+    class Broadcaster : Channel<messages>...
     {
-        //using Channel<Channels_t>::subscribe...;
-        //using Channel<Channels_t>::send...;
+        using Channel<messages>::subscribe...;
+        using Channel<messages>::send...;
+
+        template<class message>
+        Channel<message>& station() { return *this; }
     };
 }
 

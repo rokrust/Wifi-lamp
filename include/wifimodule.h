@@ -5,6 +5,7 @@
 #include "credentials.h"
 #include <Arduino.h>
 
+template <class... Messages_t>
 class WifiModule : public iot::Module
 {
 private:

@@ -7,7 +7,7 @@
 #include <ESP8266WebServer.h>
 #include <FS.h>
 
-
+template <class... Messages_t>
 class WebServerModule : public iot::Module
 {
     private:

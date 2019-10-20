@@ -22,8 +22,7 @@ namespace iot
         IotDevice::_messageQueue.push(message); 
     }
     */
-    template <class... modules_t>
-    void ModulePack<modules_t...>::setup()
+    void ModulePack::setup()
     {
         for (int i = 0; i < _modules.size(); i++)
         {
@@ -32,8 +31,7 @@ namespace iot
         }
     }
 
-    template <typename... modules_t>
-    void ModulePack<modules_t...>::loop()
+    void ModulePack::loop()
     {
         for (int i = 0; i < _modules.size(); i++)
         {
@@ -41,15 +39,13 @@ namespace iot
         }
     }
 
-    template <class... modules_t>
-    void ModulePack<modules_t...>::addModule(Module *module)
+    void ModulePack::addModule(Module *module)
     {
         _modules.push_back(module);
         Serial.println("Module added" + _modules.size());
     }
 
-    template <class... modules_t>
-    void ModulePack<modules_t...>::removeModule(Module *module)
+    void ModulePack::removeModule(Module *module)
     {
         for(int i = 0; i < _modules.size(); i++)
         {
@@ -58,8 +54,8 @@ namespace iot
         }
     }
 
-    template <typename modulePack_t, typename broadCaster_t>
-    void IotDevice<modulePack_t, broadCaster_t>::loop()
+    template <class... Messages_t>
+    void IotDevice<Messages_t...>::loop()
     {
         /*
         while (!_messageQueue.empty())
@@ -73,13 +69,12 @@ namespace iot
             delete message;
             _messageQueue.pop();
         }
-
-        _modules.loop();
         */
+        _modules.loop();
     }
 
-    template <typename modulePack_t, typename broadCaster_t>
-    IotDevice<modulePack_t, broadCaster_t>::~IotDevice()
+    template <class... Messages_t>
+    IotDevice<Messages_t...>::~IotDevice()
     {
         /*
         for(int i = 0; i < _messageQueue.size(); i++)
@@ -90,10 +85,12 @@ namespace iot
         */
     }
 
-    template <typename modulePack_t, typename broadCaster_t>
-    IotDevice<modulePack_t, broadCaster_t>::IotDevice(modulePack_t modules, broadCaster_t broadcaster)
+    /*
+    template <class... Messages_t>
+    IotDevice<Messages_t...>::IotDevice(ModulePack<Messages_t...> modules, BroadCaster<Messages_t...> broadcaster)
     {
         _broadCaster = broadcaster;
         _modules = modules;
     }
+    */
 }

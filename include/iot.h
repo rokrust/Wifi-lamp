@@ -15,7 +15,7 @@ namespace iot
 {
     using namespace std;
 
-    template <typename modulePack_t, typename broadcaster_t>
+    template <typename ...Messages_t>
     class IotDevice;
 
     class Message
@@ -27,28 +27,33 @@ namespace iot
             virtual ~Message() = 0;
     };
 
-
     class Module
     {
         private:
+            //BroadCaster<Messages_t...>* _broadCaster;
             //IotDevice *device;
 
         public:
+            //Called once at the beginning of the program
             virtual void setup() = 0;
+
+            //Called for each update of the system
             virtual void loop() = 0;
 
+            //void setBroadcaster(BroadCaster<Messages_t...> *broadCaster) { _broadCaster = broadCaster; }
+
             //template <class Callback> void subscribe(Callback callback) { device->_broadCaster.subscribe(callback); }
-            template <class Msg> void send(Msg *message) { /*device->_broadCaster.send(message);*/ };
+            template <class Msg>
+            void send(Msg *message){ /*_broadCaster->send(message);*/ }
     };
 
-    template<class ...modules_t>
     class ModulePack
     {
         private:
-            vector<Module*> _modules;
+            vector<Module/*<Messages_t...>*/*> _modules;
 
         public:
-            ModulePack() { _modules = { new modules_t... }; }
+            ModulePack() { }
 
             void setup();
             void loop();
@@ -57,28 +62,34 @@ namespace iot
             void addModule(Module* module);
     };
 
-    template<typename modulePack_t, typename broadCaster_t>
+    template<typename ...Messages_t>
     class IotDevice
     {
         private:
-            //Messages are sent to this queue and broadcast to all subscribed modules
-            broadCaster_t _broadCaster;
-            modulePack_t _modules;
+            Broadcaster<Messages_t...> _broadcaster;
+            ModulePack _modules;
 
         public:
             //template<typename modules, typename messages>
-            IotDevice(modulePack_t modulePack, broadCaster_t messagePack);
+            IotDevice(ModulePack modulePack, Broadcaster<Messages_t...> broadcaster)
+            {
+                _modules = modulePack;
+                setBroadcaster(broadcaster);
+            }
 
-            void setup();
-            void loop();
-            void addModule(Module* module);
-            void removeModule(Module* module);
-            void broadCastMessage(Message* message);
+            void setBroadcaster(Broadcaster<Messages_t...> broadcaster) 
+            { 
+                _broadcaster = broadcaster;
+                for(int i = 0; i < _modules.size(); i++) 
+                    _modules[i].setBroadcaster(broadcaster); 
+            }
+
+            void setup() { _modules.setup(); }
+            void loop() { _modules.loop(); }
 
             ~IotDevice();
     };
 
-    template <modulePack_t, broadCaster_t> class IotDevice(modulePack_t, broadCaster_t) -> IotDevice<modulePack_t, broadCaster_t>;
     //template <typename... Msg_t>
     //class IotDevice::_broadCaster<Msg_t...> { };
 
