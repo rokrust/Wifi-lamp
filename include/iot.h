@@ -5,9 +5,8 @@
 #include <vector>
 #include <string>
 #include <map>
-#include <queue>
+#include <typeindex>
 #include <functional>
-#include <utility>
 #include <Arduino.h>
 
 
@@ -15,23 +14,54 @@ namespace iot
 {
     using namespace std;
 
-    template <typename ...Messages_t>
     class IotDevice;
 
-    class Message
+    struct Message
     {
+    };
+
+    class Buffer
+    {
+        private:
+            std::map<std::type_index, Message*> _messages;
+
         public:
-            static const unsigned int id = 0;
-            virtual unsigned int getId() { return Message::id; };
-            virtual Message* clone() = 0;
-            virtual ~Message() = 0;
+
+            template<typename msg, typename... Args>
+            void send(Args &&... args)
+            {
+                //Delete old message first
+                ;
+                _messages[std::type_index(typeid(msg))] = new msg{args...};
+            }
+
+            template<typename msg>
+            msg* getMessage()
+            {
+                auto message = _messages.find(std::type_index(typeid(msg)));
+                if (message != end(_messages))
+                    return static_cast<msg *>(message->second);
+
+                return nullptr;
+            }
+
+            template<typename msg>
+            msg* receive()
+            {
+                msg* message = getMessage<msg>();
+                if(message && message->isNew)
+                    return message;
+                
+                return nullptr;
+            }
     };
 
     class Module
     {
-        private:
             //BroadCaster<Messages_t...>* _broadCaster;
             //IotDevice *device;
+        protected:
+            Buffer* _buffer;
 
         public:
             //Called once at the beginning of the program
@@ -40,17 +70,18 @@ namespace iot
             //Called for each update of the system
             virtual void loop() = 0;
 
-            //void setBroadcaster(BroadCaster<Messages_t...> *broadCaster) { _broadCaster = broadCaster; }
+            virtual void receive() {}
 
-            //template <class Callback> void subscribe(Callback callback) { device->_broadCaster.subscribe(callback); }
-            template <class Msg>
-            void send(Msg *message){ /*_broadCaster->send(message);*/ }
+            template<typename msg, typename... Args>
+            void send(Args &&... args) { _buffer->send<msg>(args...); /*_buffer->send<msg>(std::forward<Args>(args)...);*/ }
+            void setBuffer(Buffer* buffer) { _buffer = buffer; }
     };
 
     class ModulePack
     {
         private:
-            vector<Module/*<Messages_t...>*/*> _modules;
+            vector<Module*> _modules;
+            Buffer _buffer;
 
         public:
             ModulePack() { }
@@ -60,34 +91,25 @@ namespace iot
 
             void removeModule(Module* module);
             void addModule(Module* module);
+
+            ~ModulePack() { for (int i = 0; i < _modules.size(); i++) delete _modules[i]; }
     };
 
-    template<typename ...Messages_t>
     class IotDevice
     {
         private:
-            Broadcaster<Messages_t...> _broadcaster;
             ModulePack _modules;
 
         public:
-            //template<typename modules, typename messages>
-            IotDevice(ModulePack modulePack, Broadcaster<Messages_t...> broadcaster)
+            IotDevice() {}
+            IotDevice(ModulePack modulePack)
             {
                 _modules = modulePack;
-                setBroadcaster(broadcaster);
-            }
-
-            void setBroadcaster(Broadcaster<Messages_t...> broadcaster) 
-            { 
-                _broadcaster = broadcaster;
-                for(int i = 0; i < _modules.size(); i++) 
-                    _modules[i].setBroadcaster(broadcaster); 
             }
 
             void setup() { _modules.setup(); }
             void loop() { _modules.loop(); }
 
-            ~IotDevice();
     };
 
     //template <typename... Msg_t>

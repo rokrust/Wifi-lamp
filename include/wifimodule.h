@@ -5,7 +5,6 @@
 #include "credentials.h"
 #include <Arduino.h>
 
-template <class... Messages_t>
 class WifiModule : public iot::Module
 {
 private:
@@ -17,7 +16,6 @@ private:
 public:
     void setup();
     void loop();
-    WifiModule* clone() { return this; }
 
 
     void receive(WifiInfo* message);

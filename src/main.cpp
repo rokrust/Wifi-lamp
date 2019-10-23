@@ -9,10 +9,10 @@
 #include <Arduino.h>
 
 
-iot::ModulePack<WebServerModule, WifiModule> modules;
-iot::BroadCaster<WifiInfo> broadcaster;
+iot::ModulePack modules;
+//iot::BroadCaster<WifiInfo> broadcaster;
 
-iot::IotDevice device(modules, broadcaster);
+iot::IotDevice device;
 /*
 const byte interruptPin = 13;
 volatile byte val = 255;
@@ -40,6 +40,8 @@ void doubleClick() {
 void setup() {
   delay(3000);
   Serial.begin(9600);
+  modules.addModule(new WifiModule());
+  modules.addModule(new WebServerModule());
 
   /*
   device.addModule(new WebServerModule());

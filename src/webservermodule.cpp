@@ -90,7 +90,9 @@ void WebServerModule::onWifiCredentialsReceived()
         Serial.println(server.argName(i) + ": " + server.arg(i));
     }
 
-    send(new WifiInfo(server.arg(0), server.arg(1)));
+//    send(new WifiInfo(server.arg(0), server.arg(1)));
+    send<WifiInfo>("test", "test");
+
     server.sendHeader("Location", "/");
     server.send(303);
 }

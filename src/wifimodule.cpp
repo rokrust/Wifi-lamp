@@ -27,8 +27,6 @@ void WifiModule::setup()
 
 void WifiModule::receive(WifiInfo* msg)
 {
-    Serial.print("Received message: ");
-    Serial.println(msg->getId());
     Serial.print("SSID: ");
     Serial.println(msg->ssid);
     Serial.print("Password: ");

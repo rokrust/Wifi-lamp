@@ -10,9 +10,6 @@
 namespace iot
 {
     using namespace std;
-    const unsigned int Message::id;
-
-    Message::~Message() {}
 
     /*
     void Module::send(Message* message) 
@@ -36,13 +33,14 @@ namespace iot
         for (int i = 0; i < _modules.size(); i++)
         {
             _modules[i]->loop();
+            _modules[i]->receive();
         }
     }
 
     void ModulePack::addModule(Module *module)
     {
+        module->setBuffer(&_buffer);
         _modules.push_back(module);
-        Serial.println("Module added" + _modules.size());
     }
 
     void ModulePack::removeModule(Module *module)
@@ -54,43 +52,4 @@ namespace iot
         }
     }
 
-    template <class... Messages_t>
-    void IotDevice<Messages_t...>::loop()
-    {
-        /*
-        while (!_messageQueue.empty())
-        {
-            Message* message = _messageQueue.front();
-            for(int i = 0; i < _modules.size(); i++)
-            {
-                _broadCaster.send(message);
-            }
-
-            delete message;
-            _messageQueue.pop();
-        }
-        */
-        _modules.loop();
-    }
-
-    template <class... Messages_t>
-    IotDevice<Messages_t...>::~IotDevice()
-    {
-        /*
-        for(int i = 0; i < _messageQueue.size(); i++)
-        {
-            delete _messageQueue.front();
-            _messageQueue.pop();
-        }
-        */
-    }
-
-    /*
-    template <class... Messages_t>
-    IotDevice<Messages_t...>::IotDevice(ModulePack<Messages_t...> modules, BroadCaster<Messages_t...> broadcaster)
-    {
-        _broadCaster = broadcaster;
-        _modules = modules;
-    }
-    */
 }

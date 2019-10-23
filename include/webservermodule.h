@@ -7,7 +7,6 @@
 #include <ESP8266WebServer.h>
 #include <FS.h>
 
-template <class... Messages_t>
 class WebServerModule : public iot::Module
 {
     private:
@@ -24,6 +23,10 @@ class WebServerModule : public iot::Module
     public:
         void setup();
         void loop();
-        WebServerModule* clone() { return this; }
+        void receive() 
+        {
+            WifiInfo* credentials = _buffer->getMessage<WifiInfo>();
+            
+        }
 
 };
