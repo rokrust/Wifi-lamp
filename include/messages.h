@@ -4,14 +4,19 @@
 #include "button-fsm.h"
 #include "string"
 #include <Arduino.h>
+namespace{
+    struct WifiInfo : public iot::Message
+    {
+        static const unsigned int id;
 
-struct WifiInfo : public iot::Message
-{
-    //data fields
-    String ssid;
-    String password;
+        //data fields
+        String ssid;
+        String password;
+        WifiInfo(String ssid, String password) : ssid(ssid), password(password) { }
+    };
 
-};
+    const unsigned int WifiInfo::id = 1;
+}
 
 struct ButtonEvent : public iot::Message
 {

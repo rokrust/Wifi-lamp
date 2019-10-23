@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include <map>
-#include <typeindex>
 #include <functional>
 #include <Arduino.h>
 
@@ -16,44 +15,34 @@ namespace iot
 
     class IotDevice;
 
-    struct Message
-    {
-    };
+    struct Message { };
 
     class Buffer
     {
+        using CallbackFunction = std::function<void(Message *)>;
+
         private:
-            std::map<std::type_index, Message*> _messages;
+            std::map<unsigned int, std::vector<CallbackFunction>> _messages;
 
         public:
-
-            template<typename msg, typename... Args>
-            void send(Args &&... args)
+            template<typename msg>
+            void send(Message* message)
             {
                 //Delete old message first
-                ;
-                _messages[std::type_index(typeid(msg))] = new msg{args...};
+                //std::vector<CallbackFunction>& callbacks = _messages[msg::id];
+                CallbackFunction test = _messages[msg::id][0];
+                for (int i = 0; i < _messages[msg::id].size(); i++)
+                {
+                    _messages[msg::id][i](message);
+                }
             }
 
             template<typename msg>
-            msg* getMessage()
+            void subscribe(std::function<msg*> callback)
             {
-                auto message = _messages.find(std::type_index(typeid(msg)));
-                if (message != end(_messages))
-                    return static_cast<msg *>(message->second);
-
-                return nullptr;
+                _messages[msg::id].push_back([&](Message* message){ callback(static_cast<msg*>(message)); });
             }
 
-            template<typename msg>
-            msg* receive()
-            {
-                msg* message = getMessage<msg>();
-                if(message && message->isNew)
-                    return message;
-                
-                return nullptr;
-            }
     };
 
     class Module
@@ -73,7 +62,11 @@ namespace iot
             virtual void receive() {}
 
             template<typename msg, typename... Args>
-            void send(Args &&... args) { _buffer->send<msg>(args...); /*_buffer->send<msg>(std::forward<Args>(args)...);*/ }
+            void send(Args &&... args) 
+            {     
+                msg message = msg{args...};
+                _buffer->send<msg>(&(message)); 
+            }
             void setBuffer(Buffer* buffer) { _buffer = buffer; }
     };
 
@@ -92,7 +85,7 @@ namespace iot
             void removeModule(Module* module);
             void addModule(Module* module);
 
-            ~ModulePack() { for (int i = 0; i < _modules.size(); i++) delete _modules[i]; }
+            ~ModulePack() { for (unsigned int i = 0; i < _modules.size(); i++) delete _modules[i]; }
     };
 
     class IotDevice

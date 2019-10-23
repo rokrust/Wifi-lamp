@@ -32,6 +32,8 @@ void WebServerModule::uploadFile(String path)
                 server.send(500, "text/plain", "500: Could not create file");
             }
             break;
+        case UPLOAD_FILE_ABORTED:
+            break;
     }
 }
 
@@ -114,7 +116,8 @@ void WebServerModule::onResourceRequested()
     //If the file exists, open it and stream it to the client
     String contentType = getContentType(path);
     File file = SPIFFS.open(path, "r");
-    size_t size = server.streamFile(file, contentType);
+    /*size_t size = */server.streamFile(file, contentType);
+    
     file.close();
 }
 

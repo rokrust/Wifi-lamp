@@ -23,10 +23,10 @@ class WebServerModule : public iot::Module
     public:
         void setup();
         void loop();
-        void receive() 
+        void receive(WifiInfo* credentials)
         {
-            WifiInfo* credentials = _buffer->getMessage<WifiInfo>();
-            
+            Serial.println("SSID: " + credentials->ssid);
+            Serial.println("Password: " + credentials->password);
         }
 
 };

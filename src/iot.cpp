@@ -21,7 +21,7 @@ namespace iot
     */
     void ModulePack::setup()
     {
-        for (int i = 0; i < _modules.size(); i++)
+        for (unsigned int i = 0; i < _modules.size(); i++)
         {
             Serial.println("Setting up module");
             _modules[i]->setup();
@@ -30,7 +30,7 @@ namespace iot
 
     void ModulePack::loop()
     {
-        for (int i = 0; i < _modules.size(); i++)
+        for (unsigned int i = 0; i < _modules.size(); i++)
         {
             _modules[i]->loop();
             _modules[i]->receive();
@@ -45,7 +45,7 @@ namespace iot
 
     void ModulePack::removeModule(Module *module)
     {
-        for(int i = 0; i < _modules.size(); i++)
+        for(unsigned int i = 0; i < _modules.size(); i++)
         {
             if(_modules[i] == module)
                 _modules.erase(_modules.begin() + i);
