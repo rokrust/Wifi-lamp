@@ -25,22 +25,26 @@ namespace iot
             std::map<unsigned int, std::vector<CallbackFunction>> _messages;
 
         public:
-            template<typename msg>
+            template<typename Msg>
             void send(Message* message)
             {
-                //Delete old message first
-                //std::vector<CallbackFunction>& callbacks = _messages[msg::id];
-                CallbackFunction test = _messages[msg::id][0];
-                for (int i = 0; i < _messages[msg::id].size(); i++)
+                std::vector<CallbackFunction> callbacks = _messages[Msg::id];
+                for (int i = 0; i < callbacks.size(); i++)
                 {
-                    _messages[msg::id][i](message);
+                    callbacks[i](message);
                 }
             }
 
-            template<typename msg>
-            void subscribe(std::function<msg*> callback)
+            template<typename Msg>
+            void subscribe(std::function<void(Msg*)> callback)
             {
-                _messages[msg::id].push_back([&](Message* message){ callback(static_cast<msg*>(message)); });
+                _messages[Msg::id].push_back([&](Message* message){ callback(static_cast<Msg*>(message)); });
+            }
+
+            template<typename ...Msg>
+            void subscribe(std::function<void(Msg*)&&... msg)
+            {
+                subscribe<Msg>(msg)...;
             }
 
     };
@@ -91,17 +95,17 @@ namespace iot
     class IotDevice
     {
         private:
-            ModulePack _modules;
+            ModulePack* _modules;
 
         public:
             IotDevice() {}
-            IotDevice(ModulePack modulePack)
+            IotDevice(ModulePack* modulePack)
             {
                 _modules = modulePack;
             }
 
-            void setup() { _modules.setup(); }
-            void loop() { _modules.loop(); }
+            void setup() { _modules->setup(); }
+            void loop() { _modules->loop(); }
 
     };
 

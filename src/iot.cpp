@@ -11,14 +11,6 @@ namespace iot
 {
     using namespace std;
 
-    /*
-    void Module::send(Message* message) 
-    {
-        Serial.print("Sending message: ");
-        Serial.println(message->getId());
-        IotDevice::_messageQueue.push(message); 
-    }
-    */
     void ModulePack::setup()
     {
         for (unsigned int i = 0; i < _modules.size(); i++)
