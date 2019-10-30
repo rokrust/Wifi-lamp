@@ -4,10 +4,10 @@
 
 void WifiModule::connectWifi()
 {
-    /*if (!WiFi.isConnected() && hasCredentials)
+    if (hasCredentials && !WiFi.isConnected())
     {
         WiFi.begin(credentials.ssid, credentials.password);
-    }*/
+    }
 }
 
 void WifiModule::setup()
@@ -17,19 +17,17 @@ void WifiModule::setup()
     WiFi.softAPConfig(ip, ip, IPAddress(255, 255, 255, 0));
     WiFi.softAP("Lamp Config");
     
-    subscribe<WifiInfo>(&WifiModule::test);
+    subscribe<WifiInfo>(&WifiModule::setCredentials);
 }
 
 void WifiModule::loop()
 {
-    //connectWifi();
+    connectWifi();
 }
 
-void WifiModule::test(WifiInfo *msg)
+void WifiModule::setCredentials(WifiInfo *msg)
 {
-    Serial.println("Wifi credentials received");
-    Serial.print("SSID: ");
-    Serial.println(msg->ssid);
-    Serial.print("Password: ");
-    Serial.println(msg->password);
+    credentials.ssid = msg->ssid;
+    credentials.password = msg->password;
+    hasCredentials = true;
 }

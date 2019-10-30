@@ -97,7 +97,6 @@ namespace iot
             template<typename Msg, typename ModuleInstance>
             void subscribe(void(ModuleInstance::*callback)(Msg*))
             {
-                using namespace std::placeholders;
                 subscribe<Msg>([this, callback](Msg *msg) { (((ModuleInstance*)this)->*callback)(msg); });
             }
 
@@ -105,7 +104,6 @@ namespace iot
             template <typename Msg, typename ModuleInstance>
             void subscribe(ModuleInstance* self, void (ModuleInstance::*callback)(Msg *))
             {
-                using namespace std::placeholders;
                 subscribe<Msg>([self, callback](Msg *msg) { (self->*callback)(msg); });
             }
 

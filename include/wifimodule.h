@@ -17,5 +17,5 @@ public:
     void setup();
     void loop();
     
-    void test(WifiInfo* msg);
+    void setCredentials(WifiInfo* msg);
 };
