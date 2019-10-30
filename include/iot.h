@@ -38,13 +38,15 @@ namespace iot
             template<typename Msg>
             void subscribe(std::function<void(Msg*)> callback)
             {
-                _messages[Msg::id].push_back([&](Message* message){ callback(static_cast<Msg*>(message)); });
+                _messages[Msg::id].push_back([callback](Message *message) { callback(static_cast<Msg *>(message)); });
             }
 
             template<typename ...Msg>
-            void subscribe(std::function<void(Msg*)&&... msg)
+            void subscribe(std::function<void(Msg*)>&&... msg)
             {
-                subscribe<Msg>(msg)...;
+                //Hacky pre-c++17 solution for passing variadic arguments to a function
+                using expand_type = int[];
+                expand_type{ 0, (subscribe<Msg>(msg), 0)... };
             }
 
     };
@@ -63,14 +65,50 @@ namespace iot
             //Called for each update of the system
             virtual void loop() = 0;
 
-            virtual void receive() {}
-
+            //Requires the message to have a constructor
             template<typename msg, typename... Args>
             void send(Args &&... args) 
             {     
                 msg message = msg{args...};
                 _buffer->send<msg>(&(message)); 
             }
+
+            template <typename msg>
+            void send(msg* message)
+            {
+                _buffer->send<msg>(message);
+            }
+
+            template<typename msg>
+            void subscribe(std::function<void(msg*)> callback)
+            {
+                _buffer->subscribe<msg>(callback);
+            }
+
+            template<typename ...Msg>
+            void subscribe(std::function<void(Msg*)>&&... msg)
+            {
+                //Hacky pre-c++17 solution for passing variadic arguments to a function
+                using expand_type = int[];
+                expand_type{0, (subscribe<Msg>(msg), 0)...};
+            }
+
+            //This is unsafe as it expects the member function to belong to the calling instance
+            template<typename Msg, typename ModuleInstance>
+            void subscribe(void(ModuleInstance::*callback)(Msg*))
+            {
+                using namespace std::placeholders;
+                subscribe<Msg>([this, callback](Msg *msg) { (((ModuleInstance*)this)->*callback)(msg); });
+            }
+
+            //Explicit, safe version. Can set member function callback from a different class
+            template <typename Msg, typename ModuleInstance>
+            void subscribe(ModuleInstance* self, void (ModuleInstance::*callback)(Msg *))
+            {
+                using namespace std::placeholders;
+                subscribe<Msg>([self, callback](Msg *msg) { (self->*callback)(msg); });
+            }
+
             void setBuffer(Buffer* buffer) { _buffer = buffer; }
     };
 
@@ -89,7 +127,7 @@ namespace iot
             void removeModule(Module* module);
             void addModule(Module* module);
 
-            ~ModulePack() { for (unsigned int i = 0; i < _modules.size(); i++) delete _modules[i]; }
+            //~ModulePack() { for (unsigned int i = 0; i < _modules.size(); i++) delete _modules[i]; }
     };
 
     class IotDevice

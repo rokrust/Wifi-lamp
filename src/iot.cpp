@@ -25,7 +25,6 @@ namespace iot
         for (unsigned int i = 0; i < _modules.size(); i++)
         {
             _modules[i]->loop();
-            _modules[i]->receive();
         }
     }
 

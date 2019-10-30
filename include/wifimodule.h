@@ -16,7 +16,6 @@ private:
 public:
     void setup();
     void loop();
-
-
-    void receive(WifiInfo* message);
+    
+    void test(WifiInfo* msg);
 };

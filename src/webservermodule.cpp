@@ -121,20 +121,14 @@ void WebServerModule::onResourceRequested()
     file.close();
 }
 
-void WebServerModule::setup()
+void WebServerModule::setupWebRequests()
 {
-    if (!SPIFFS.begin())
-    {
-        Serial.println("Could not mount");
-    }
-
-    Serial.println("\tWebserver module");
-    server.on("/login", HTTP_POST, [this](){
+    server.on("/login", HTTP_POST, [this]() {
         Serial.println("Posted to /login");
         onWifiCredentialsReceived();
     });
 
-    server.on("/upload", HTTP_POST, [this](){
+    server.on("/upload", HTTP_POST, [this]() {
         Serial.println("Downloading file");
         onFileUpload();
     });
@@ -143,11 +137,26 @@ void WebServerModule::setup()
         Serial.println("Resource requested");
         onResourceRequested();
     });
+}
+
+void WebServerModule::setup()
+{
+    //Setup file system
+    if (!SPIFFS.begin())
+    {
+        Serial.println("Could not mount");
+    }
+
+    Serial.println("\tWebserver module");
+    setupWebRequests();
 
     server.begin();
 }
 
 void WebServerModule::loop()
 {
-    server.handleClient();
+    delay(500);
+    send<WifiInfo>("ssid test", "password test");
+
+    //server.handleClient();
 }

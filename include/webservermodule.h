@@ -19,14 +19,10 @@ class WebServerModule : public iot::Module
         String getContentType(String path);
         String removePath(String path);
         void uploadFile(String path);
+        void setupWebRequests();
 
     public:
         void setup();
         void loop();
-        void receive(WifiInfo* credentials)
-        {
-            Serial.println("SSID: " + credentials->ssid);
-            Serial.println("Password: " + credentials->password);
-        }
 
 };
