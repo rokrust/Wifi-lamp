@@ -1,4 +1,4 @@
-#include "webservermodule.h"
+#include "modules/webservermodule.h"
 
 void WebServerModule::uploadFile(String path)
 {
@@ -84,16 +84,12 @@ void WebServerModule::onFileUpload()
 
 void WebServerModule::onWifiCredentialsReceived()
 {
-    Serial.println("Received password");
-    Serial.println("SSID: " + server.arg("ssid"));
-
     for(int i = 0; i < server.args(); i++)
     {
         Serial.println(server.argName(i) + ": " + server.arg(i));
     }
 
-//    send(new WifiInfo(server.arg(0), server.arg(1)));
-    send<WifiInfo>("test", "test");
+    send<WifiInfo>(server.arg("ssid"), server.arg("password"));
 
     server.sendHeader("Location", "/");
     server.send(303);
@@ -155,8 +151,5 @@ void WebServerModule::setup()
 
 void WebServerModule::loop()
 {
-    delay(500);
-    send<WifiInfo>("ssid test", "password test");
-
-    //server.handleClient();
+    server.handleClient();
 }

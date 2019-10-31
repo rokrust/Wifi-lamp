@@ -2,9 +2,8 @@
 // Make it possible to subscribe to a message with member functions
 
 #include "iot.h"
-#include "webservermodule.h"
-#include "wifimodule.h"
-#include "buttonmodule.h"
+#include "modules/webservermodule.h"
+#include "modules/wifimodule.h"
 #include <Arduino.h>
 
 
