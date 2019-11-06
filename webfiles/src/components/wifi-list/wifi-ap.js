@@ -44,7 +44,7 @@ const PasswordInput = (props) => {
     return (
         < InputWrap action="/login" method="POST" pose={ props.expanded ? "visible" : "hidden" }>
             <input type="hidden" name="ssid" value={props.ssid}/>
-            <input type="text" placeholder="Password"/>
+            <input type="text" name="password" placeholder="Password"/>
             <SubmitButton type="submit">
                 Submit
             </SubmitButton>

@@ -17,9 +17,19 @@ namespace{
 
         WifiInfo(String ssid, String password) : ssid(ssid), password(password) { }
     };
-
     const unsigned int WifiInfo::id = 1;
 
+    struct WifiAp : public iot::Message
+    {
+        static const unsigned int id;
+
+        //data fields
+        String ssid;
+        int signalStrength;
+
+        WifiAp(String ssid, int signalStrength) : ssid(ssid), signalStrength(signalStrength) { }
+    };
+    const unsigned int WifiAp::id = 2;
 
     struct ButtonEvent : public iot::Message
     {
@@ -32,5 +42,5 @@ namespace{
         ButtonEvent(uint8_t buttonNumber, State clickType) : buttonNumber(buttonNumber), clickType(clickType) {}
     };
 
-    const unsigned int ButtonEvent::id = 2;
+    const unsigned int ButtonEvent::id = 3;
 }

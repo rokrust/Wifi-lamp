@@ -1,4 +1,6 @@
 #include "modules/webservermodule.h"
+#include "messages.h"
+#include <WifiClient.h>
 
 void WebServerModule::uploadFile(String path)
 {
@@ -89,11 +91,25 @@ void WebServerModule::onWifiCredentialsReceived()
         Serial.println(server.argName(i) + ": " + server.arg(i));
     }
 
-    send<WifiInfo>(server.arg("ssid"), server.arg("password"));
+    send<WifiInfo>(server.arg(0), server.arg(1));
 
     server.sendHeader("Location", "/");
     server.send(303);
 }
+
+// void WebServerModule::onEventStreamRequested()
+// {
+//     Serial.println("Event requested");
+
+//     WiFiClient client = server.client();
+//     client.println("HTTP/1.1 200 OK");
+//     client.println("Content-Type: text/event-stream;charset=UTF-8");
+//     client.println("Connection: keep-alive");
+//     client.println("Access-Control-Allow-Origin: *");
+//     client.println("Cache-Control: no-cache");
+//     client.println();
+//     client.flush();
+// }
 
 void WebServerModule::onResourceRequested()
 {
@@ -129,6 +145,12 @@ void WebServerModule::setupWebRequests()
         onFileUpload();
     });
 
+    server.on("/aplist", [this](){
+        Serial.println("Sending wifi ap");
+        
+        server.send(200, "application/json", data);
+    });
+
     server.onNotFound([this]() {
         Serial.println("Resource requested");
         onResourceRequested();
@@ -147,9 +169,29 @@ void WebServerModule::setup()
     setupWebRequests();
 
     server.begin();
+
+    subscribe<WifiAp>(&WebServerModule::sendWifiApList);
 }
 
 void WebServerModule::loop()
 {
     server.handleClient();
+}
+
+void WebServerModule::sendWifiApList(WifiAp *ap)
+{
+    Serial.println("Wifi received");
+    
+    data = "{\"ssid\": \"" + ap->ssid + "\", \"signalStrength\": \"" + ap->signalStrength + "\"}";
+    Serial.print("json: "); Serial.println(data);
+
+    // client.println("event: aplist");
+    // client.println("Content-Type: text/event-stream");
+    // client.print("data: {\"ssid\": \"");
+    // client.print(ap->ssid);
+    // client.print("\", \"signalStrength\": \"");
+    // client.print(ap->signalStrength);
+    // client.println("\"}");
+    // client.println();
+    // client.flush();
 }

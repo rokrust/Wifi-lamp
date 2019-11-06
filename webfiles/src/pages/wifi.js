@@ -17,15 +17,32 @@ class Wifi extends Component {
         ];
 
         this.state = {
-            availableWifi : this.apList
+            availableWifi : []
         };
     }
 
-    /*componentDidMount() {
-        fetch('http://www.wifiLamp.local/aplist') //Should receive from esp. What should the URL be?
-        .then(response => response.json())
-        .then(data => this.setState({ availableWifi : data }));
-    }*/
+    requestWifi = async () => {
+        try {
+            let response = await fetch("/aplist");
+            let data = await response.json();
+
+            console.log(JSON.stringify(data));
+            console.log([apObject(data.ssid, data.signalStrength)]);
+            
+            this.setState({availableWifi: [apObject(data.ssid, data.signalStrength)]}, () => console.log(this.state));
+        } catch(error) {
+            console.error("Error: ", error);
+        }
+    }
+
+
+    componentDidMount() {
+        this.intervalId = setInterval(this.requestWifi, 5000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.intervalId);
+    }
 
     render() {
         return (

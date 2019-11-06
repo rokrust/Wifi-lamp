@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include "Ticker.h"
 #include "timer.h"
 #include "button-fsm.h"
 
