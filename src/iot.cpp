@@ -24,7 +24,7 @@ namespace iot
     {
         for (unsigned int i = 0; i < _modules.size(); i++)
         {
-            if(_modules[i]->destroy())
+            if(_modules[i]->remove())
             {
                 //_modules.erase(_modules.begin() + i--);
                 //deallocate callback functions
@@ -36,7 +36,7 @@ namespace iot
         }
     }
 
-    void ModulePack::addModule(Module *module)
+    void ModulePack::add(Module *module)
     {
         module->setInterceptorBuffer(&_interceptorBuffer);
         module->setRequestBuffer(&_requestBuffer);
@@ -45,13 +45,18 @@ namespace iot
         _modules.push_back(module);
     }
 
-    void ModulePack::removeModule(Module *module)
+    void ModulePack::remove(Module *module)
     {
         for(unsigned int i = 0; i < _modules.size(); i++)
         {
             if(_modules[i] == module)
                 _modules.erase(_modules.begin() + i);
         }
+    }
+
+    void ModulePack::add(Interceptor* interceptor)
+    {
+        interceptor->setBuffer(&_messageBuffer);
     }
 
 }

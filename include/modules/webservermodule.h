@@ -11,7 +11,6 @@ class WebServerModule : public iot::Module
     private:
         ESP8266WebServer server;
         File fileHandle;
-        String data = "";
 
         void onFileUpload();
         void onWifiCredentialsReceived();

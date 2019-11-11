@@ -12,10 +12,7 @@ namespace iot
 
     class IotDevice;
 
-    struct Message 
-    { 
-        bool isRequest;
-    };
+    struct Message { };
 
     class Buffer
     {
@@ -84,6 +81,8 @@ namespace iot
             {
                 subscribe<Msg>([self, callback](Msg *msg) { (self->*callback)(msg); });
             }
+
+            void setBuffer(Buffer* buffer) { _buffer = buffer; }
     };
 
     class Module
@@ -169,7 +168,7 @@ namespace iot
             virtual void loop() = 0;
 
             //On returning true, module is removed from Modulepack
-            virtual bool destroy() { return false; }
+            virtual bool remove() { return false; }
     };
 
     class ModulePack
@@ -186,11 +185,11 @@ namespace iot
             void setup();
             void loop();
 
-            void removeModule(Module* module);
-            void addModule(Module* module);
+            void add(Module* module);
+            void add(Interceptor* interceptor);
 
-            void addInterceptor(Interceptor* interceptor);
-            void removeInterceptor(Interceptor* interceptor);
+            void remove(Module* module);
+            void remove(Interceptor* interceptor);
 
             //~ModulePack() { for (unsigned int i = 0; i < _modules.size(); i++) delete _modules[i]; }
     };

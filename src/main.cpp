@@ -12,8 +12,8 @@ iot::IotDevice device(&modules);
 
 void setup() {
   Serial.begin(9600);
-  modules.addModule(new WifiModule());
-  modules.addModule(new WebServerModule());
+  modules.add(new WifiModule());
+  modules.add(new WebServerModule());
 
   device.setup();
 }

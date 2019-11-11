@@ -146,9 +146,7 @@ void WebServerModule::setupWebRequests()
     });
 
     server.on("/aplist", [this](){
-        Serial.println("Sending wifi ap");
-        
-        server.send(200, "application/json", data);
+        request<WifiAp>();
     });
 
     server.onNotFound([this]() {
@@ -180,18 +178,6 @@ void WebServerModule::loop()
 
 void WebServerModule::sendWifiApList(WifiAp *ap)
 {
-    Serial.println("Wifi received");
-    
-    data = "{\"ssid\": \"" + ap->ssid + "\", \"signalStrength\": \"" + ap->signalStrength + "\"}";
-    Serial.print("json: "); Serial.println(data);
-
-    // client.println("event: aplist");
-    // client.println("Content-Type: text/event-stream");
-    // client.print("data: {\"ssid\": \"");
-    // client.print(ap->ssid);
-    // client.print("\", \"signalStrength\": \"");
-    // client.print(ap->signalStrength);
-    // client.println("\"}");
-    // client.println();
-    // client.flush();
+    String data = "{\"ssid\": \"" + ap->ssid + "\", \"signalStrength\": \"" + ap->signalStrength + "\"}";
+    server.send(200, "application/json", data);
 }
