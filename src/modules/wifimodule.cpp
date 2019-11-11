@@ -54,12 +54,27 @@ void WifiModule::setupAp()
     WiFi.softAP("Lamp Config");
 }
 
+void WifiModule::scanWifi(WifiAp* ap)
+{
+    int n = WiFi.scanNetworks();
+
+    Serial.print("Scanned networks: ");
+    Serial.print(WiFi.SSID(n - 1));
+    Serial.print(", ");
+    Serial.println(WiFi.RSSI(n - 1));
+
+    ap->ssid = WiFi.SSID(0);
+    ap->signalStrength = WiFi.RSSI(0);
+    send<WifiAp>(ap);
+}
+
 void WifiModule::setup()
 {
     setupAp();
     scanTimer.start();
 
     subscribe<WifiInfo>(&WifiModule::setCredentials);
+    respond<WifiAp>(&WifiModule::scanWifi);
 }
 
 void WifiModule::loop()

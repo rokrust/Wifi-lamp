@@ -16,6 +16,7 @@ class WifiModule : public iot::Module
 
         bool connectionTimeout();
         void handleConnectionTimeout();
+        void scanWifi(WifiAp* ap);
 
 
     public:

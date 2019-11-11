@@ -24,13 +24,24 @@ namespace iot
     {
         for (unsigned int i = 0; i < _modules.size(); i++)
         {
+            if(_modules[i]->destroy())
+            {
+                //_modules.erase(_modules.begin() + i--);
+                //deallocate callback functions
+                continue;
+            }
+
             _modules[i]->loop();
+
         }
     }
 
     void ModulePack::addModule(Module *module)
     {
-        module->setBuffer(&_buffer);
+        module->setInterceptorBuffer(&_interceptorBuffer);
+        module->setRequestBuffer(&_requestBuffer);
+        module->setMessageBuffer(&_messageBuffer);
+        
         _modules.push_back(module);
     }
 

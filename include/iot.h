@@ -12,7 +12,10 @@ namespace iot
 
     class IotDevice;
 
-    struct Message { };
+    struct Message 
+    { 
+        bool isRequest;
+    };
 
     class Buffer
     {
@@ -48,42 +51,20 @@ namespace iot
 
     };
 
-    class Module
+    class Interceptor
     {
-            //BroadCaster<Messages_t...>* _broadCaster;
-            //IotDevice *device;
-        protected:
-            Buffer* _buffer;
+        private:
+            Buffer *_buffer;
 
         public:
-            //Called once at the beginning of the program
-            virtual void setup() = 0;
-
-            //Called for each update of the system
-            virtual void loop() = 0;
-
-            //Requires the message to have a constructor
-            template<typename msg, typename... Args>
-            void send(Args &&... args) 
-            {     
-                msg message = msg{args...};
-                _buffer->send<msg>(&(message)); 
-            }
-
             template <typename msg>
-            void send(msg* message)
-            {
-                _buffer->send<msg>(message);
-            }
-
-            template<typename msg>
-            void subscribe(std::function<void(msg*)> callback)
+            void subscribe(std::function<void(msg *)> callback)
             {
                 _buffer->subscribe<msg>(callback);
             }
 
-            template<typename ...Msg>
-            void subscribe(std::function<void(Msg*)>&&... msg)
+            template <typename... Msg>
+            void subscribe(std::function<void(Msg *)> &&... msg)
             {
                 //Hacky pre-c++17 solution for passing variadic arguments to a function
                 using expand_type = int[];
@@ -91,27 +72,113 @@ namespace iot
             }
 
             //This is unsafe as it expects the member function to belong to the calling instance
-            template<typename Msg, typename ModuleInstance>
-            void subscribe(void(ModuleInstance::*callback)(Msg*))
+            template <typename Msg, typename ModuleInstance>
+            void subscribe(void (ModuleInstance::*callback)(Msg *))
             {
-                subscribe<Msg>([this, callback](Msg *msg) { (((ModuleInstance*)this)->*callback)(msg); });
+                subscribe<Msg>([this, callback](Msg *msg) { (((ModuleInstance *)this)->*callback)(msg); });
             }
 
             //Explicit, safe version. Can set member function callback from a different class
             template <typename Msg, typename ModuleInstance>
-            void subscribe(ModuleInstance* self, void (ModuleInstance::*callback)(Msg *))
+            void subscribe(ModuleInstance *self, void (ModuleInstance::*callback)(Msg *))
+            {
+                subscribe<Msg>([self, callback](Msg *msg) { (self->*callback)(msg); });
+            }
+    };
+
+    class Module
+    {
+        private:
+            Buffer *_messageBuffer;
+            Buffer *_requestBuffer;
+            Buffer *_interceptorBuffer;
+
+        public:
+            //Requires the message to have a constructor
+            template <typename msg, typename... Args>
+            void send(Args &&... args)
+            {
+                msg message = msg{args...};
+                send(&(message));
+            }
+
+            template <typename msg>
+            void send(msg *message)
+            {
+                _interceptorBuffer->send<msg>(message);
+                _messageBuffer->send<msg>(message);
+            }
+
+            template <typename msg>
+            void request()
+            {
+                msg message;
+                _requestBuffer->send<msg>(message);
+            }
+
+            template <typename msg>
+            void respond(std::function<void(msg *)> callback)
+            {
+                _requestBuffer->subscribe<msg>(callback);
+            }
+
+            //This is unsafe as it expects the member function to belong to the calling instance
+            template <typename Msg, typename ModuleInstance>
+            void respond(void (ModuleInstance::*callback)(Msg *))
+            {
+                respond<Msg>([this, callback](Msg *msg) { (((ModuleInstance *)this)->*callback)(msg); });
+            }
+
+            template <typename msg>
+            void subscribe(std::function<void(msg *)> callback)
+            {
+                _messageBuffer->subscribe<msg>(callback);
+            }
+
+            template <typename... Msg>
+            void subscribe(std::function<void(Msg *)> &&... msg)
+            {
+                //Hacky pre-c++17 solution for passing variadic arguments to a function
+                using expand_type = int[];
+                expand_type{0, (subscribe<Msg>(msg), 0)...};
+            }
+
+            //This is unsafe as it expects the member function to belong to the calling instance
+            template <typename Msg, typename ModuleInstance>
+            void subscribe(void (ModuleInstance::*callback)(Msg *))
+            {
+                subscribe<Msg>([this, callback](Msg *msg) { (((ModuleInstance *)this)->*callback)(msg); });
+            }
+
+            //Explicit, safe version. Can set member function callback from a different class
+            template <typename Msg, typename ModuleInstance>
+            void subscribe(ModuleInstance *self, void (ModuleInstance::*callback)(Msg *))
             {
                 subscribe<Msg>([self, callback](Msg *msg) { (self->*callback)(msg); });
             }
 
-            void setBuffer(Buffer* buffer) { _buffer = buffer; }
+            void setInterceptorBuffer(Buffer *buffer) { _interceptorBuffer = buffer; }
+            void setMessageBuffer(Buffer *buffer) { _messageBuffer = buffer; }
+            void setRequestBuffer(Buffer *buffer) { _requestBuffer = buffer; }
+
+
+            //Called once at the beginning of the program
+            virtual void setup() = 0;
+
+            //Called for each update of the system
+            virtual void loop() = 0;
+
+            //On returning true, module is removed from Modulepack
+            virtual bool destroy() { return false; }
     };
 
     class ModulePack
     {
         private:
             vector<Module*> _modules;
-            Buffer _buffer;
+            Buffer _messageBuffer;
+            Buffer _requestBuffer;
+            Buffer _interceptorBuffer;
 
         public:
             ModulePack() { }
@@ -121,6 +188,9 @@ namespace iot
 
             void removeModule(Module* module);
             void addModule(Module* module);
+
+            void addInterceptor(Interceptor* interceptor);
+            void removeInterceptor(Interceptor* interceptor);
 
             //~ModulePack() { for (unsigned int i = 0; i < _modules.size(); i++) delete _modules[i]; }
     };
@@ -142,9 +212,4 @@ namespace iot
 
     };
 
-    //template <typename... Msg_t>
-    //class IotDevice::_broadCaster<Msg_t...> { };
-
-    //template <typename... Module_t>
-    //class IotDevice::_modules<Module_t...> { };
 }
