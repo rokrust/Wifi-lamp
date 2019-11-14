@@ -91,19 +91,6 @@ void WifiModule::loop()
         handleConnectionTimeout();
     }
 
-    if (scanTimer.time() > 30*1000)
-    {
-        int n = WiFi.scanNetworks();
-        
-        Serial.print("Scanned networks: ");
-        Serial.print(WiFi.SSID(n-1));
-        Serial.print(", ");
-        Serial.println(WiFi.RSSI(n-1));
-        
-        send<WifiAp>(WiFi.SSID(0), WiFi.RSSI(0));
-
-    }
-
     if(WiFi.isConnected())
     {
         Serial.print("Connected");

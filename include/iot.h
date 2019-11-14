@@ -5,12 +5,13 @@
 #include <map>
 #include <functional>
 
-
 namespace iot 
 {
     using namespace std;
 
-    class IotDevice;
+    namespace Messages { static unsigned int messageCount = 0; }
+    template<typename msg> struct MessageId { static unsigned int id; };
+    template<typename msg> unsigned int MessageId<msg>::id = Messages::messageCount++;
 
     struct Message { };
 
@@ -25,7 +26,7 @@ namespace iot
             template<typename Msg>
             void send(Message* message)
             {
-                std::vector<CallbackFunction> callbacks = _messages[Msg::id];
+                std::vector<CallbackFunction> callbacks = _messages[MessageId<Msg>::id];
                 for (int i = 0; i < callbacks.size(); i++)
                 {
                     callbacks[i](message);
@@ -35,7 +36,7 @@ namespace iot
             template<typename Msg>
             void subscribe(std::function<void(Msg*)> callback)
             {
-                _messages[Msg::id].push_back([callback](Message *message) { callback(static_cast<Msg *>(message)); });
+                _messages[MessageId<Msg>::id].push_back([callback](Message *message) { callback(static_cast<Msg *>(message)); });
             }
 
             template<typename ...Msg>
@@ -61,11 +62,11 @@ namespace iot
             }
 
             template <typename... Msg>
-            void subscribe(std::function<void(Msg *)> &&... msg)
+            void subscribe(std::function<void(Msg *)> &&... callback)
             {
                 //Hacky pre-c++17 solution for passing variadic arguments to a function
                 using expand_type = int[];
-                expand_type{0, (subscribe<Msg>(msg), 0)...};
+                expand_type{0, (subscribe<Msg>(callback), 0)...};
             }
 
             //This is unsafe as it expects the member function to belong to the calling instance
@@ -112,7 +113,7 @@ namespace iot
             void request()
             {
                 msg message;
-                _requestBuffer->send<msg>(message);
+                _requestBuffer->send<msg>(&message);
             }
 
             template <typename msg>
@@ -187,6 +188,7 @@ namespace iot
 
             void add(Module* module);
             void add(Interceptor* interceptor);
+            template<typename msg> void add(std::function<void(msg* message)> callback) { _interceptorBuffer.subscribe<msg>(callback); }
 
             void remove(Module* module);
             void remove(Interceptor* interceptor);
@@ -201,10 +203,7 @@ namespace iot
 
         public:
             IotDevice() {}
-            IotDevice(ModulePack* modulePack)
-            {
-                _modules = modulePack;
-            }
+            IotDevice(ModulePack* modulePack) { _modules = modulePack; }
 
             void setup() { _modules->setup(); }
             void loop() { _modules->loop(); }

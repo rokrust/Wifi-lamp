@@ -97,20 +97,6 @@ void WebServerModule::onWifiCredentialsReceived()
     server.send(303);
 }
 
-// void WebServerModule::onEventStreamRequested()
-// {
-//     Serial.println("Event requested");
-
-//     WiFiClient client = server.client();
-//     client.println("HTTP/1.1 200 OK");
-//     client.println("Content-Type: text/event-stream;charset=UTF-8");
-//     client.println("Connection: keep-alive");
-//     client.println("Access-Control-Allow-Origin: *");
-//     client.println("Cache-Control: no-cache");
-//     client.println();
-//     client.flush();
-// }
-
 void WebServerModule::onResourceRequested()
 {
     //Look for the requested file in the build folder
@@ -172,7 +158,7 @@ void WebServerModule::setup()
 }
 
 void WebServerModule::loop()
-{
+{ 
     server.handleClient();
 }
 

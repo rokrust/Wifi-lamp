@@ -1,6 +1,3 @@
-// TODO
-// Make it possible to subscribe to a message with member functions
-
 #include "iot.h"
 #include "modules/webservermodule.h"
 #include "modules/wifimodule.h"
