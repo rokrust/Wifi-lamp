@@ -10,37 +10,49 @@ namespace iot
     using namespace std;
 
     namespace Messages { static unsigned int messageCount = 0; }
-    template<typename msg> struct MessageId { static unsigned int id; };
-    template<typename msg> unsigned int MessageId<msg>::id = Messages::messageCount++;
+    template<typename msg> struct MessageId { static const unsigned int id; };
+    template<typename msg> const unsigned int MessageId<msg>::id = Messages::messageCount++;
 
     struct Message { };
 
     class Buffer
     {
-        using CallbackFunction = std::function<void(Message *)>;
+        using CallbackFunction = std::function<bool(Message *)>;
 
         private:
             std::map<unsigned int, std::vector<CallbackFunction>> _messages;
 
         public:
             template<typename Msg>
-            void send(Message* message)
+            bool send(Message* message)
             {
                 std::vector<CallbackFunction> callbacks = _messages[MessageId<Msg>::id];
                 for (int i = 0; i < callbacks.size(); i++)
                 {
-                    callbacks[i](message);
+                    if(!callbacks[i](message))
+                        return false;
                 }
+
+                return true;
             }
 
             template<typename Msg>
-            void subscribe(std::function<void(Msg*)> callback)
+            void subscribe(std::function<bool(Msg*)> callback)
             {
-                _messages[MessageId<Msg>::id].push_back([callback](Message *message) { callback(static_cast<Msg *>(message)); });
+                _messages[MessageId<Msg>::id].push_back([callback](Message *message) { return callback(static_cast<Msg *>(message)); });
+            }
+            
+            template <typename Msg>
+            void subscribe(std::function<void(Msg *)> callback)
+            {
+                _messages[MessageId<Msg>::id].push_back([callback](Message *message) { 
+                    callback(static_cast<Msg *>(message)); 
+                    return true;
+                });
             }
 
             template<typename ...Msg>
-            void subscribe(std::function<void(Msg*)>&&... msg)
+            void subscribe(std::function<bool(Msg*)>&&... msg)
             {
                 //Hacky pre-c++17 solution for passing variadic arguments to a function
                 using expand_type = int[];
@@ -49,20 +61,78 @@ namespace iot
 
     };
 
+    struct InterceptorBuffer
+    {
+        Buffer filter;
+        Buffer translation;
+        Buffer edit;
+
+        template <typename msg, typename ...Args>
+        bool send(Args&&... args) 
+        {
+            msg message = {args...};
+            return send(&message);
+        }
+
+        template <typename msg>
+        bool send(msg* message)
+        {
+            return filter.send<msg>(message) &&
+                   translation.send<msg>(message) &&
+                   edit.send<msg>(message);
+        }
+
+        template<typename msg>
+        void subscribeFilter(std::function<bool(msg*)> callback) { filter.subscribe(callback); }
+        
+        template <typename msg>
+        void subscribeTranslator(std::function<bool(msg *)> callback) { translation.subscribe(callback); }
+        
+        template <typename msg>
+        void subscribeEditor(std::function<bool(msg *)> callback) { edit.subscribe(callback); }
+    };
+
     class Interceptor
     {
         private:
-            Buffer *_buffer;
+            Buffer *_messageBuffer;
+            InterceptorBuffer *_interceptorBuffer;
+
+            bool _dropMessage = false;
 
         public:
+            void drop() { _dropMessage = true; }
+
+            template <typename msg, typename ...Args>
+            void replaceWith(Args &&... args)
+            {
+                msg message = msg{args...};
+                replaceWith(&(message));
+            }
+
+            template <typename msg>
+            void replaceWith(msg* message)
+            {
+                drop();
+
+                if(_interceptorBuffer->send(message))
+                   _messageBuffer->send(message);                
+            }
+
             template <typename msg>
             void subscribe(std::function<void(msg *)> callback)
             {
-                _buffer->subscribe<msg>(callback);
+                _interceptorBuffer->subscribe<msg>(callback);
+            }
+
+            template <typename msg>
+            void subscribe(std::function<bool(msg *)> callback)
+            {
+                _interceptorBuffer->subscribe<msg>(callback);
             }
 
             template <typename... Msg>
-            void subscribe(std::function<void(Msg *)> &&... callback)
+            void subscribe(std::function<bool(Msg *)> &&... callback)
             {
                 //Hacky pre-c++17 solution for passing variadic arguments to a function
                 using expand_type = int[];
@@ -73,17 +143,55 @@ namespace iot
             template <typename Msg, typename ModuleInstance>
             void subscribe(void (ModuleInstance::*callback)(Msg *))
             {
-                subscribe<Msg>([this, callback](Msg *msg) { (((ModuleInstance *)this)->*callback)(msg); });
+                subscribe<Msg, ModuleInstance>((ModuleInstance)this, callback);
             }
 
             //Explicit, safe version. Can set member function callback from a different class
             template <typename Msg, typename ModuleInstance>
             void subscribe(ModuleInstance *self, void (ModuleInstance::*callback)(Msg *))
             {
-                subscribe<Msg>([self, callback](Msg *msg) { (self->*callback)(msg); });
+                subscribe<Msg>([self, callback](Msg *msg) 
+                { 
+                    self->_dropMessage = false;
+                    (self->*callback)(msg); 
+                    
+                    return self->_dropMessage;
+                });
             }
 
-            void setBuffer(Buffer* buffer) { _buffer = buffer; }
+            void setInterceptorBuffer(InterceptorBuffer* buffer) { _interceptorBuffer = buffer; }
+            void setMessageBuffer(Buffer *buffer) { _messageBuffer = buffer; }
+
+
+            //
+            //Captures an incoming message and replaces it with a different type
+            template<typename from, typename to, typename... Args>
+            void translate(Args &&... args)
+            {
+                //dump in and send out with args
+            }
+
+            //make translate**
+            template <typename in, typename out>
+            void translate()
+            {
+                
+            }
+
+            //make edit**
+            //Captures an incoming message and edits its data fields
+            template<typename msg>
+            void edit(msg* message)
+            {
+
+            }
+
+            //make filter**
+            template<typename msg>
+            void filter(std::function<bool(msg*)> filterFunction)
+            {
+                _interceptorBuffer->subscribeFilter(filterFunction);
+            }
     };
 
     class Module
@@ -91,7 +199,7 @@ namespace iot
         private:
             Buffer *_messageBuffer;
             Buffer *_requestBuffer;
-            Buffer *_interceptorBuffer;
+            InterceptorBuffer *_interceptorBuffer;
 
         public:
             //Requires the message to have a constructor
@@ -147,17 +255,17 @@ namespace iot
             template <typename Msg, typename ModuleInstance>
             void subscribe(void (ModuleInstance::*callback)(Msg *))
             {
-                subscribe<Msg>([this, callback](Msg *msg) { (((ModuleInstance *)this)->*callback)(msg); });
+                subscribe<Msg, ModuleInstance>((ModuleInstance*)this, callback);
             }
 
             //Explicit, safe version. Can set member function callback from a different class
             template <typename Msg, typename ModuleInstance>
             void subscribe(ModuleInstance *self, void (ModuleInstance::*callback)(Msg *))
             {
-                subscribe<Msg>([self, callback](Msg *msg) { (self->*callback)(msg); });
+                subscribe<Msg>([self, callback](Msg *msg){ (self->*callback)(msg); });
             }
 
-            void setInterceptorBuffer(Buffer *buffer) { _interceptorBuffer = buffer; }
+            void setInterceptorBuffer(InterceptorBuffer *buffer) { _interceptorBuffer = buffer; }
             void setMessageBuffer(Buffer *buffer) { _messageBuffer = buffer; }
             void setRequestBuffer(Buffer *buffer) { _requestBuffer = buffer; }
 
@@ -178,7 +286,7 @@ namespace iot
             vector<Module*> _modules;
             Buffer _messageBuffer;
             Buffer _requestBuffer;
-            Buffer _interceptorBuffer;
+            InterceptorBuffer _interceptorBuffer;
 
         public:
             ModulePack() { }
@@ -188,7 +296,13 @@ namespace iot
 
             void add(Module* module);
             void add(Interceptor* interceptor);
-            template<typename msg> void add(std::function<void(msg* message)> callback) { _interceptorBuffer.subscribe<msg>(callback); }
+            
+            /*template <typename msg>
+            void add(std::function<void(msg *message)> callback) { _interceptorBuffer.subscribe<msg>(callback); }
+            
+            template<typename msg> 
+            void add(std::function<bool(msg* message)> callback) { _interceptorBuffer.subscribe<msg>(callback); }
+            */
 
             void remove(Module* module);
             void remove(Interceptor* interceptor);
