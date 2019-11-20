@@ -101,24 +101,6 @@ namespace iot
             bool _dropMessage = false;
 
         public:
-            void drop() { _dropMessage = true; }
-
-            template <typename msg, typename ...Args>
-            void replaceWith(Args &&... args)
-            {
-                msg message = msg{args...};
-                replaceWith(&(message));
-            }
-
-            template <typename msg>
-            void replaceWith(msg* message)
-            {
-                drop();
-
-                if(_interceptorBuffer->send(message))
-                   _messageBuffer->send(message);                
-            }
-
             template <typename msg>
             void subscribe(std::function<void(msg *)> callback)
             {
@@ -150,47 +132,50 @@ namespace iot
             template <typename Msg, typename ModuleInstance>
             void subscribe(ModuleInstance *self, void (ModuleInstance::*callback)(Msg *))
             {
-                subscribe<Msg>([self, callback](Msg *msg) 
-                { 
-                    self->_dropMessage = false;
-                    (self->*callback)(msg); 
-                    
-                    return self->_dropMessage;
-                });
+                subscribe<Msg>([self, callback](Msg *msg) { (self->*callback)(msg); });
             }
 
             void setInterceptorBuffer(InterceptorBuffer* buffer) { _interceptorBuffer = buffer; }
             void setMessageBuffer(Buffer *buffer) { _messageBuffer = buffer; }
 
-
-            //
-            //Captures an incoming message and replaces it with a different type
-            template<typename from, typename to, typename... Args>
-            void translate(Args &&... args)
-            {
-                //dump in and send out with args
-            }
-
-            //make translate**
+            //simple event translation
             template <typename in, typename out>
-            void translate()
+            void translate(std::function<void(out*)> callback)
             {
-                
+                translate->subscribe<in>([callback](in* inMsg){
+                    out outMsg;
+                    callback(&outMsg);
+                    send<out>(outMsg);
+                    
+                    return false; //dump "in" message
+                });
             }
 
-            //make edit**
+            //direct translation
+            template <typename in, typename out>
+            void translate(std::function<void(in*, out*)> callback)
+            {
+                translate->subscribe<in>([callback](in* inMsg){
+                    out outMsg;
+                    callback(inMsg, &outMsg);
+                    send<out>(msg);
+
+                    return false; //dump "in" message
+                });
+            }
+
+            //one to many translation
+            
+
             //Captures an incoming message and edits its data fields
             template<typename msg>
-            void edit(msg* message)
-            {
-
-            }
+            void edit(std::function<void(msg*)> callback) { edit->subscribe<msg>(callback); }
 
             //make filter**
             template<typename msg>
             void filter(std::function<bool(msg*)> filterFunction)
             {
-                _interceptorBuffer->subscribeFilter(filterFunction);
+                filter->subscribeFilter(filterFunction);
             }
     };
 
