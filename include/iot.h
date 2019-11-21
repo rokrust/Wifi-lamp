@@ -89,7 +89,7 @@ namespace iot
         void subscribeTranslator(std::function<bool(msg *)> callback) { translation.subscribe(callback); }
         
         template <typename msg>
-        void subscribeEditor(std::function<bool(msg *)> callback) { edit.subscribe(callback); }
+        void subscribeEditor(std::function<void(msg *)> callback) { edit.subscribe(callback); }
     };
 
     class Interceptor
@@ -98,41 +98,21 @@ namespace iot
             Buffer *_messageBuffer;
             InterceptorBuffer *_interceptorBuffer;
 
-            bool _dropMessage = false;
+            enum class InterceptorType { FILTER, TRANSLATOR, EDITOR };
+            InterceptorType _currentInterceptorType;
+            bool _sentMessage = false;
+            
 
         public:
-            template <typename msg>
-            void subscribe(std::function<void(msg *)> callback)
-            {
-                _interceptorBuffer->subscribe<msg>(callback);
-            }
 
             template <typename msg>
-            void subscribe(std::function<bool(msg *)> callback)
+            void send(msg* message)
             {
-                _interceptorBuffer->subscribe<msg>(callback);
-            }
+                if(_currentInterceptorType != TRANSLATOR)
+                    return; //none of the other interceptors should send a message. Throw an exception here maybe
 
-            template <typename... Msg>
-            void subscribe(std::function<bool(Msg *)> &&... callback)
-            {
-                //Hacky pre-c++17 solution for passing variadic arguments to a function
-                using expand_type = int[];
-                expand_type{0, (subscribe<Msg>(callback), 0)...};
-            }
-
-            //This is unsafe as it expects the member function to belong to the calling instance
-            template <typename Msg, typename ModuleInstance>
-            void subscribe(void (ModuleInstance::*callback)(Msg *))
-            {
-                subscribe<Msg, ModuleInstance>((ModuleInstance)this, callback);
-            }
-
-            //Explicit, safe version. Can set member function callback from a different class
-            template <typename Msg, typename ModuleInstance>
-            void subscribe(ModuleInstance *self, void (ModuleInstance::*callback)(Msg *))
-            {
-                subscribe<Msg>([self, callback](Msg *msg) { (self->*callback)(msg); });
+                _sentMessage = true;
+                _currentInterceptorType->send<msg>(message);
             }
 
             void setInterceptorBuffer(InterceptorBuffer* buffer) { _interceptorBuffer = buffer; }
@@ -142,7 +122,9 @@ namespace iot
             template <typename in, typename out>
             void translate(std::function<void(out*)> callback)
             {
-                translate->subscribe<in>([callback](in* inMsg){
+                _interceptorBuffer->subscribeTranslator<in>([this, callback](in* inMsg){
+                    _currentInterceptorType = TRANSLATOR;
+
                     out outMsg;
                     callback(&outMsg);
                     send<out>(outMsg);
@@ -155,7 +137,10 @@ namespace iot
             template <typename in, typename out>
             void translate(std::function<void(in*, out*)> callback)
             {
-                translate->subscribe<in>([callback](in* inMsg){
+                _interceptorBuffer->subscribeTranslator<in>([this, callback](in* inMsg)
+                {
+                    _currentInterceptorType = TRANSLATOR;
+
                     out outMsg;
                     callback(inMsg, &outMsg);
                     send<out>(msg);
@@ -164,18 +149,64 @@ namespace iot
                 });
             }
 
+            //conditional translation
+            template <typename in, typename out>
+            void translate(std::function<bool(in*, out*)> callback)
+            {
+                _interceptorBuffer->subscribeTranslator<in>([callback](in* inMsg)
+                {
+                    _currentInterceptorType = TRANSLATOR;
+
+                    out outMsg;
+                    if(callback(inMsg, &outMsg))
+                    {
+                        send<out>(outMsg);
+                        return false; //dump "in message" if a new message was sent
+                    }
+                    
+                    return true; //pass "in message" onward if out wasn't sent
+                });
+            }
+
             //one to many translation
-            
+            template<typename in, typename classType>
+            void translate(bool(classType::*callback)(in*))
+            {
+                _interceptorBuffer->subscribeTranslator<in>([this](in* msg)
+                { 
+                    _currentInterceptorType = TRANSLATOR;
+                    return callback(msg); 
+                });
+            }
 
             //Captures an incoming message and edits its data fields
             template<typename msg>
             void edit(std::function<void(msg*)> callback) { edit->subscribe<msg>(callback); }
 
-            //make filter**
+            template<typename Msg, typename classType>
+            void edit(void(classType::*callback)(Msg*))
+            {
+                _interceptorBuffer->subscribeEditor<Msg>([this, callback](Msg* msg)
+                { 
+                    _currentInterceptorType = EDITOR;
+                    ((classType)this)->callback(msg);
+                });
+            }
+
             template<typename msg>
             void filter(std::function<bool(msg*)> filterFunction)
             {
-                filter->subscribeFilter(filterFunction);
+                _interceptorBuffer->subscribeFilter(filterFunction);
+            }
+
+            template<typename Msg, typename classType>
+            void filter(bool(classType::*callback)(Msg*))
+            {
+                _interceptorBuffer->subscribeFilter<Msg>([this, callback](Msg* msg)
+                { 
+                    _currentInterceptorType = FILTER;
+                    return ((classType)this)->callback(msg);
+                });
             }
     };
 
