@@ -13,6 +13,11 @@ namespace iot
 
     void ModulePack::setup()
     {
+        for(int i = 0; i < _interceptors.size(); i++)
+        {
+            _interceptors[i]->setup();
+        }
+
         for (unsigned int i = 0; i < _modules.size(); i++)
         {
             Serial.println("Setting up module");
@@ -58,6 +63,9 @@ namespace iot
     {
         interceptor->setInterceptorBuffer(&_interceptorBuffer);
         interceptor->setMessageBuffer(&_messageBuffer);
+
+        _interceptors.push_back(interceptor);
+
     }
 
 }
