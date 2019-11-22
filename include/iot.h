@@ -126,7 +126,7 @@ namespace iot
             }
 
 
-            //simple event translation
+            //event translation
             template <typename in, typename out>
             void translate(std::function<void(out*)> callback)
             {
@@ -176,17 +176,18 @@ namespace iot
                 });
             }
 
-            //one to many translation
+            //one to many translation - pass message on when true is returned
             template<typename in, typename classType>
             void translate(bool(classType::*callback)(in*))
             {
                 _interceptorBuffer->subscribeTranslator<in>([this, callback](in* msg)
                 { 
                     _currentInterceptorType = TRANSLATOR;
-                    return callback(msg); 
+                    return ((classType)this)->callback(msg);
                 });
             }
 
+            //one to many translation - drop message
             template <typename in, typename classType>
             void translate(void (classType::*callback)(in *))
             {

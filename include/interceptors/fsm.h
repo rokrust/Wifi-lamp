@@ -7,6 +7,7 @@ class StateMachine : public iot::Interceptor
     public:
         void setup() 
         {
+            filter<WifiAp>(true);
             translate<ButtonEvent>(&(StateMachine::translateButtonEvent));
         }
 
