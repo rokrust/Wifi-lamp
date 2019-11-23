@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <functional>
+#include <Arduino.h>
 
 namespace iot 
 {
@@ -83,7 +84,19 @@ namespace iot
         }
 
         template<typename msg>
-        void subscribeFilter(std::function<bool(msg*)> callback) { filter.subscribe(callback); }
+        void subscribeFilter(std::function<bool(msg*)> callback) 
+        { 
+            filter.subscribe<msg>([callback](msg* message)
+            { 
+                if(!callback(message))
+                {
+                    Serial.println("Message dropped");
+                    return false;
+                }
+
+                return true;
+            }); 
+        }
         
         template <typename msg>
         void subscribeTranslator(std::function<bool(msg *)> callback) { translation.subscribe(callback); }
@@ -111,7 +124,7 @@ namespace iot
             template<typename msg, typename ... Args>
             void send(Args &&... args)
             {
-                msg message = msg{...args};
+                msg message = msg{args...};
                 send(&message);
             }
 
@@ -124,7 +137,6 @@ namespace iot
                 _sentMessage = true;
                 _interceptorBuffer->send<msg>(message);
             }
-
 
             //event translation
             template <typename in, typename out>
@@ -141,9 +153,18 @@ namespace iot
                 });
             }
 
+            template <typename in, typename out, typename InterceptorType>
+            void translate(void (InterceptorType::*callback)(out *))
+            {
+                translate<in, out>([this, callback](out* msg)
+                {
+                    ((InterceptorType*)this)->callback(msg);
+                });
+            }
+
             //direct translation
             template <typename in, typename out>
-            void translate(std::function<void(in*, out*)> callback)
+            void translate(std::function<void(in *, out *)> callback)
             {
                 _interceptorBuffer->subscribeTranslator<in>([this, callback](in* inMsg)
                 {
@@ -154,6 +175,15 @@ namespace iot
                     send<out>(outMsg);
 
                     return false; //dump "in" message
+                });
+            }
+
+            //direct translation
+            template <typename in, typename out, typename InterceptorType>
+            void translate(void(InterceptorType::*callback)(in *, out *))
+            {
+                translate<in, out>([this, callback](in *inMsg) {
+                    ((InterceptorType*)this)->callback();
                 });
             }
 
@@ -176,6 +206,16 @@ namespace iot
                 });
             }
 
+            //conditional translation
+            template<typename in, typename out, typename InterceptorType>
+            void translate(bool(InterceptorType::*callback)(in*, out*))
+            {
+                translate<in, out>([this, callback](in* inMsg, out* outMsg)
+                {
+                    return ((InterceptorType*)this)->callback(inMsg, outMsg);
+                });
+            }
+
             //one to many translation - pass message on when true is returned
             template<typename in, typename classType>
             void translate(bool(classType::*callback)(in*))
@@ -183,17 +223,17 @@ namespace iot
                 _interceptorBuffer->subscribeTranslator<in>([this, callback](in* msg)
                 { 
                     _currentInterceptorType = TRANSLATOR;
-                    return ((classType)this)->callback(msg);
+                    return (((classType*)this)->*callback)(msg);
                 });
             }
 
             //one to many translation - drop message
-            template <typename in, typename classType>
-            void translate(void (classType::*callback)(in *))
+            template <typename in, typename InterceptorType>
+            void translate(void (InterceptorType::*callback)(in *))
             {
                 _interceptorBuffer->subscribeTranslator<in>([this, callback](in *msg) {
                     _currentInterceptorType = TRANSLATOR;
-                    callback(msg);
+                    ((InterceptorType*)this)->callback(msg);
                     
                     return false;
                 });
@@ -209,7 +249,7 @@ namespace iot
                 _interceptorBuffer->subscribeEditor<Msg>([this, callback](Msg* msg)
                 { 
                     _currentInterceptorType = EDITOR;
-                    ((classType)this)->callback(msg);
+                    ((classType*)this)->callback(msg);
                     
                     return true;
                 });
@@ -227,17 +267,17 @@ namespace iot
                 _interceptorBuffer->subscribeFilter<Msg>([this, callback](Msg* msg)
                 { 
                     _currentInterceptorType = FILTER;
-                    return ((classType)this)->callback(msg);
+                    return ((classType*)this)->callback(msg);
                 });
             }
 
             template<typename msg>
             void filter(bool drop)
             { 
-                _interceptorBuffer->subscribeFilter<msg>([this](msg* message)
+                _interceptorBuffer->subscribeFilter<msg>([this, drop](msg* message)
                 {
                     _currentInterceptorType = FILTER;
-                    return false;
+                    return !drop;
                 }); 
             }
 
