@@ -1,3 +1,5 @@
+#pragma once
+
 #include "iot.h"
 #include "messages.h"
 class StateMachine : public iot::Interceptor
@@ -7,4 +9,5 @@ class StateMachine : public iot::Interceptor
     public:
         void setup();
         bool translateButtonEvent(ButtonEvent* buttonEvent);
+        bool filterWifiAp(WifiAp *ap);
 };

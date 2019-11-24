@@ -31,4 +31,16 @@ namespace{
         ButtonEvent(uint8_t buttonNumber, State clickType) : buttonNumber(buttonNumber), clickType(clickType) {}
     };
 
+    struct TestMessage : public iot::Message
+    {
+        int val;
+        TestMessage(int val=0) : val(val) {}
+    };
+
+    struct ReceiveTestMessage : public iot::Message
+    {
+        int val;
+        ReceiveTestMessage(int val=0) : val(val) {}
+    };
+
 }
