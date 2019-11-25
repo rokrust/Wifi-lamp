@@ -77,6 +77,7 @@ namespace iot
             };
             
             InterceptorType _currentInterceptorType;
+            bool _dropTranslatedMessage = false;
 
         public:
             template <typename msg, typename ...Args>
@@ -95,9 +96,15 @@ namespace iot
                     return true;
                 }*/
 
-                return filter.send<msg>(message) &&
-                    translation.send<msg>(message) &&
+                // return filter.send<msg>(message) &&
+                //     translation.send<msg>(message) &&
+                //     edit.send<msg>(message);
+                if(filter.send<msg>(message))
+                    translation.send<msg>(message);
+                if(!_branchTranslatedMessage)
                     edit.send<msg>(message);
+                
+                _branchTranslatedMessage = false;
             }
 
             template<typename msg>
@@ -116,8 +123,8 @@ namespace iot
                 translation.subscribe<Msg>([this, callback](Msg* message)
                 { 
                     _currentInterceptorType = TRANSLATOR;
-                    return callback(message);
-                }); 
+                    _dropTranslatedMessage = callback(message);
+                }, false); 
             }
             
             template <typename msg>
