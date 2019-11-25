@@ -236,13 +236,13 @@ namespace iot
 
             //one to many translation - pass message on when true is returned
             template<typename in, typename classType>
-            void translate(void(classType::*callback)(in*))
+            void translate(void(classType::*callback)(in*), bool drop=false)
             {
-                _interceptorBuffer->subscribeTranslator<in>([this, callback](in *msg) 
+                _interceptorBuffer->subscribeTranslator<in>([this, callback, drop](in *msg) 
                 { 
                     Serial.println("One to many"); 
                     (((classType *)this)->*callback)(msg); 
-                    return false;
+                    return !drop;
                 });
             }
 

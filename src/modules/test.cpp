@@ -33,12 +33,11 @@ void ReceiveTest::receiveTestMessage(ReceiveTestMessage* msg)
 
 void InterceptorTest::setup()
 {
-
     //edit<ReceiveTestMessage>(&InterceptorTest::editTestMessage);
     
     //translate<TestMessage, ReceiveTestMessage>(&InterceptorTest::testTranslateDirect);
     //translate<TestMessage>(&InterceptorTest::testTranslateEvent);
-    translate<TestMessage, InterceptorTest>(&InterceptorTest::testTranslateOneToMany);
+    translate<TestMessage>(&InterceptorTest::testTranslateOneToMany);
 
     //filter<TestMessage>(&InterceptorTest::filterTestMessage);
 
