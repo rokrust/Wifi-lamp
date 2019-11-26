@@ -99,12 +99,13 @@ namespace iot
                 // return filter.send<msg>(message) &&
                 //     translation.send<msg>(message) &&
                 //     edit.send<msg>(message);
-                if(filter.send<msg>(message))
-                    translation.send<msg>(message);
-                if(!_branchTranslatedMessage)
-                    edit.send<msg>(message);
                 
-                _branchTranslatedMessage = false;
+                bool passMessageOn = filter.send<msg>(message) && 
+                    translation.send<msg>(message) && !_dropTranslatedMessage &&
+                    edit.send<msg>(message);
+
+                _dropTranslatedMessage = false;
+                return passMessageOn;
             }
 
             template<typename msg>
@@ -213,7 +214,7 @@ namespace iot
                     (((InterceptorType*)this)->*callback)(inMsg, outMsg);
                 });
             }
-
+/*
             // //conditional translation
             // template <typename in, typename out>
             // void translate(std::function<bool(in*, out*)> callback)
@@ -240,7 +241,7 @@ namespace iot
             //         return ((InterceptorType*)this)->*callback(inMsg, outMsg);
             //     });
             // }
-
+*/
             //one to many translation - pass message on when true is returned
             template<typename in, typename classType>
             void translate(void(classType::*callback)(in*), bool drop=false)
@@ -249,21 +250,9 @@ namespace iot
                 { 
                     Serial.println("One to many"); 
                     (((classType *)this)->*callback)(msg); 
-                    return !drop;
+                    return drop;
                 });
             }
-
-            //one to many translation - drop message
-            // template <typename in, typename InterceptorType>
-            // void translate(void (InterceptorType::*callback)(in *), bool drop)
-            // {
-            //     _interceptorBuffer->subscribeTranslator<in>([this, callback, drop](in *msg) 
-            //     {
-            //         Serial.println("One to many");
-            //         ((InterceptorType*)this)->callback(msg);
-            //         return !drop;
-            //     });
-            // }
 
             //Captures an incoming message and edits its data fields
             template<typename msg>

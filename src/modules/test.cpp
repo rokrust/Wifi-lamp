@@ -45,12 +45,14 @@ void InterceptorTest::setup()
 
 void InterceptorTest::editTestMessage(ReceiveTestMessage* msg)
 {
+    Serial.println("Edit");
     if(msg->val == 3)
         msg->val = 4;
 }
 
 bool InterceptorTest::filterTestMessage(TestMessage* msg)
 {
+    Serial.println("Filter");
     if(msg->val == 3)
         return true;
     return false;
@@ -58,16 +60,19 @@ bool InterceptorTest::filterTestMessage(TestMessage* msg)
 
 void InterceptorTest::testTranslateDirect(TestMessage* inMsg, ReceiveTestMessage* outMsg)
 {
+    Serial.println("Direct translation");
     outMsg->val = inMsg->val + 1;
 }
 
 void InterceptorTest::testTranslateEvent(ReceiveTestMessage* outMsg)
 {
+    Serial.println("Event translation");
     outMsg->val = 1;
 }
 
 void InterceptorTest::testTranslateOneToMany(TestMessage *inMsg)
 {
+    Serial.println("One to many translation");
     switch(inMsg->val)
     {
         case 1:
