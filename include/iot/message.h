@@ -1,5 +1,5 @@
 #pragma once
-
+#include<vector>
 typedef unsigned char Byte;
 
 #define READTYPE(type)           \
@@ -13,22 +13,43 @@ class Stream
 {
 
     private:
-        Byte* _stream;
+        vector<Byte> _stream;
         int _byte;
+        bool _block;
 
         void writeStream(Byte *var, int size)
         {
+            while(_block);
+            _block = true;
+
+            //Resize if necessary
+            if(_stream.size() < size) _stream.resize(size);
+
             for (int i = 0; i < size; i++)
                 _stream[_byte++] = var[i];
+
+            _block = false;
         }
 
         void readStream(Byte *p, int size)
         {
+            while(_block);
+            _block = true;
+            
             for (int i = 0; i < size; i++)
                 p[i] = _stream[_byte++];
+            
+            _block = false;
         }
 
     public:
+        Stream()
+        {
+            _byte = 0;
+            _block = false;
+        }
+
+
         template <typename T>
         void write(T var, int size = sizeof(T)) { writeStream((Byte *)&var, size); }
         void writeMessage(iot::Message *msg)
@@ -52,7 +73,9 @@ class Stream
 
         void copy(Byte* stream, int size)
         {
-            _stream = new Byte[size];
+            //Resize if necessary
+            if(_stream.size() < size) _stream.resize(size);
+
             for(int i = 0; i < size; i++)
                 _stream[i] = stream[i];
         }
