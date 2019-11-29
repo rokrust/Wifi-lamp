@@ -1,11 +1,6 @@
-#include <vector>
-#include <string>
-#include <map>
-#include <queue>
 #include <Arduino.h>
-#include <type_traits>
 
-#include "iot.h"
+#include "iot/iot.h"
 
 namespace iot
 {

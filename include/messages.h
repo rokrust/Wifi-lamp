@@ -1,11 +1,12 @@
 #pragma once
 
-#include "iot.h"
+#include "iot/iot.h"
 #include "button-fsm.h"
 #include "string"
 #include <Arduino.h>
 
-namespace{
+namespace
+{
 
     struct WifiInfo : public iot::Message
     {
@@ -35,6 +36,8 @@ namespace{
     {
         int val;
         TestMessage(int val=0) : val(val) {}
+        
+        void serialize() {}
     };
 
     struct ReceiveTestMessage : public iot::Message

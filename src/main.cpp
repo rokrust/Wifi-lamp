@@ -1,8 +1,7 @@
-#include "iot.h"
+#include "iot/iot.h"
 #include "modules/webservermodule.h"
 #include "modules/wifimodule.h"
 #include "modules/test.h"
-#include "interceptors/fsm.h"
 #include <Arduino.h>
 
 

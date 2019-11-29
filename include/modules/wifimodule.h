@@ -1,6 +1,6 @@
 #pragma once
 
-#include "iot.h"
+#include "iot/iot.h"
 #include "messages.h"
 #include "credentials.h"
 #include "timer.h"

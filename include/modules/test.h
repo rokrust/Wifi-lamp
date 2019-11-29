@@ -1,6 +1,6 @@
 #pragma once
 
-#include "iot.h"
+#include "iot/iot.h"
 #include "messages.h"
 
 class SendTest : public iot::Module

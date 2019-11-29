@@ -1,6 +1,6 @@
 #pragma once
 
-#include "iot.h"
+#include "iot/iot.h"
 #include "messages.h"
 #include <Arduino.h>
 #include <ESP8266WebServer.h>
