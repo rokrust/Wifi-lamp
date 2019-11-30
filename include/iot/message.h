@@ -1,19 +1,36 @@
 #pragma once
-#include<vector>
+#include <vector>
+#include <cstdint>
+
 typedef unsigned char Byte;
 
-#define READTYPE(type)           \
-    Byte p[sizeof(type)];        \
-    readStream(p, sizeof(type)); \
-    return *((type *)p);
+#define READTYPE(type) Byte p[sizeof(type)]; readStream(p, sizeof(type)); return *((type *)p)
 
-struct iot::Message;
+namespace iot
+{
+    class Stream;
+    
+    namespace Messages { static unsigned int messageCount = 0; }
+    
+    template <typename msg>
+    struct MessageId { static const unsigned int id; };
+    
+    template <typename msg>
+    const unsigned int MessageId<msg>::id = Messages::messageCount++;
+
+    struct Message
+    {
+        virtual void serialize(Stream* stream) {}
+        virtual void deserialize(Stream* stream) {}
+    };
+
+}
 
 class Stream
 {
 
     private:
-        vector<Byte> _stream;
+        std::vector<Byte> _stream;
         int _byte;
         bool _block;
 
@@ -71,6 +88,8 @@ class Stream
             message->deserialize(this);
         }
 
+        void resetPointer() { _byte = 0; }
+
         void copy(Byte* stream, int size)
         {
             //Resize if necessary
@@ -80,23 +99,3 @@ class Stream
                 _stream[i] = stream[i];
         }
 };
-
-namespace iot
-{
-    namespace Messages { static unsigned int messageCount = 0; }
-    
-    template <typename msg>
-    struct MessageId { static const unsigned int id; };
-    
-    template <typename msg>
-    const unsigned int MessageId<msg>::id = Messages::messageCount++;
-
-    struct Message
-    {
-        virtual void serialize(Stream* stream) {}
-        virtual void deserialize(Stream* stream) {}
-    };
-
-}
-
-

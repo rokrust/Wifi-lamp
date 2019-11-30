@@ -1,6 +1,6 @@
 #pragma once
 
-#include "iot/iot.h"
+#include "iot/message.h"
 #include "button-fsm.h"
 #include "string"
 #include <Arduino.h>
@@ -37,7 +37,15 @@ namespace
         int val;
         TestMessage(int val=0) : val(val) {}
         
-        void serialize() {}
+        void serialize(Stream* stream) 
+        {
+            stream->write(val, 4);
+        }
+
+        void deserialize(Stream* stream)
+        {
+            val = stream->readInt32();
+        }
     };
 
     struct ReceiveTestMessage : public iot::Message
