@@ -54,6 +54,42 @@ namespace iot
             }
     };
 
+    class ModuleBuffer
+    {
+        private:
+            std::vector<int> _sources;
+            Buffer _messageBuffer;
+            Serializer _serializer;
+
+            template<typename msg>
+            bool broadcast(msg* message)
+            {
+                return true;
+            }
+
+        public:
+            template<typename msg>
+            bool send(msg* message) 
+            {
+                if(!messageBuffer.send<msg>(message)) return false;
+                
+                message->serialize(&_serializer);
+                if(_serializer.dirty())
+                {
+                    broadcast(message);
+                    _serializer.clearDirty();
+                }
+
+                return true;
+            }
+
+            template<typename msg>
+            void subscribe(std::function<void(msg *)> callback)
+            {
+                _message.subscribe<msg>(callback, false);
+            }
+    };
+
     class InterceptorBuffer
     {
         private:
@@ -82,16 +118,6 @@ namespace iot
             template <typename msg>
             bool send(msg *message)
             {
-                /*if(_currentInterceptorType != TRANSLATOR)
-                        {
-                            Serial.println("Can only send message from a translation type interceptor");
-                            return true;
-                        }*/
-
-                // return filter.send<msg>(message) &&
-                //     translation.send<msg>(message) &&
-                //     edit.send<msg>(message);
-
                 bool passMessageOn = filter.send<msg>(message) &&
                                     translation.send<msg>(message) && !_dropTranslatedMessage &&
                                     edit.send<msg>(message);

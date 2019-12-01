@@ -7,7 +7,7 @@ namespace iot
     class Interceptor
     {
         private:
-            Buffer *_messageBuffer;
+            ModuleBuffer *_moduleBuffer;
             InterceptorBuffer *_interceptorBuffer;
 
             bool _sentMessage = false;
@@ -16,7 +16,7 @@ namespace iot
             virtual void setup() = 0;
 
             void setInterceptorBuffer(InterceptorBuffer *buffer) { _interceptorBuffer = buffer; }
-            void setMessageBuffer(Buffer *buffer) { _messageBuffer = buffer; }
+            void setModuleBuffer(ModuleBuffer *buffer) { _moduleBuffer = buffer; }
 
             template <typename msg, typename... Args>
             void send(Args &&... args)
@@ -29,7 +29,7 @@ namespace iot
             void send(msg *message)
             {
                 _sentMessage = true;
-                _interceptorBuffer->send<msg>(message) && _messageBuffer->send<msg>(message);
+                _interceptorBuffer->send<msg>(message) && _moduleBuffer->send<msg>(message);
             }
 
             //event translation

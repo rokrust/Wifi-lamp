@@ -6,9 +6,10 @@ typedef unsigned char Byte;
 
 #define READTYPE(type) Byte p[sizeof(type)]; readStream(p, sizeof(type)); return *((type *)p)
 
+
 namespace iot
 {
-    class Stream;
+    class Serializer;
     
     namespace Messages { static unsigned int messageCount = 0; }
     
@@ -20,19 +21,20 @@ namespace iot
 
     struct Message
     {
-        virtual void serialize(Stream* stream) {}
-        virtual void deserialize(Stream* stream) {}
+        virtual void serialize(Serializer* stream) {}
+        virtual void deserialize(Serializer* stream) {}
     };
 
 }
 
-class Stream
+class Serializer
 {
 
     private:
         std::vector<Byte> _stream;
         int _byte;
         bool _block;
+        bool _dirty;
 
         void writeStream(Byte *var, int size)
         {
@@ -46,6 +48,7 @@ class Stream
                 _stream[_byte++] = var[i];
 
             _block = false;
+            _dirty = true;
         }
 
         void readStream(Byte *p, int size)
@@ -60,12 +63,15 @@ class Stream
         }
 
     public:
-        Stream()
+        Serializer()
         {
             _byte = 0;
             _block = false;
+            _dirty = false;
         }
 
+        bool dirty() { return _dirty; }
+        void clearDirty() { _dirty = false; }
 
         template <typename T>
         void write(T var, int size = sizeof(T)) { writeStream((Byte *)&var, size); }

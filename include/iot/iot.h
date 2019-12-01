@@ -1,6 +1,7 @@
 #pragma once
 #include "iot/module.h"
 #include "iot/interceptor.h"
+#include "iot/message.h"
 
 #include <vector>
 #include <string>
@@ -18,9 +19,10 @@ namespace iot
             vector<Module*> _modules;
             vector<Interceptor*> _interceptors;
 
-            Buffer _messageBuffer;
             Buffer _requestBuffer;
+            ModuleBuffer _moduleBuffer;
             InterceptorBuffer _interceptorBuffer;
+
 
         public:
             ModulePack() { }

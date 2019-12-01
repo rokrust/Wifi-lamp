@@ -37,12 +37,12 @@ namespace
         int val;
         TestMessage(int val=0) : val(val) {}
         
-        void serialize(Stream* stream) 
+        void serialize(Serializer* stream) 
         {
             stream->write(val, 4);
         }
 
-        void deserialize(Stream* stream)
+        void deserialize(Serializer* stream)
         {
             val = stream->readInt32();
         }

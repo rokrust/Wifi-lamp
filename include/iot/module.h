@@ -6,9 +6,9 @@ namespace iot
     class Module
     {
         private:
-            Buffer *_messageBuffer;
             Buffer *_requestBuffer;
             InterceptorBuffer *_interceptorBuffer;
+            ModuleBuffer *_moduleBuffer;
 
         public:
             //Requires the message to have a constructor
@@ -22,7 +22,7 @@ namespace iot
             template <typename msg>
             void send(msg *message)
             {
-                _interceptorBuffer->send<msg>(message) && _messageBuffer->send<msg>(message);
+                _interceptorBuffer->send<msg>(message) && _moduleBuffer->send<msg>(message);
             }
 
             template <typename msg>
@@ -48,7 +48,7 @@ namespace iot
             template <typename msg>
             void subscribe(std::function<void(msg *)> callback)
             {
-                _messageBuffer->subscribe<msg>(callback, false);
+                _moduleBuffer->subscribe<msg>(callback);
             }
 
             template <typename... Msg>
@@ -74,7 +74,7 @@ namespace iot
             }
 
             void setInterceptorBuffer(InterceptorBuffer *buffer) { _interceptorBuffer = buffer; }
-            void setMessageBuffer(Buffer *buffer) { _messageBuffer = buffer; }
+            void setModuleBuffer(ModuleBuffer *buffer) { _moduleBuffer = buffer; }
             void setRequestBuffer(Buffer *buffer) { _requestBuffer = buffer; }
 
             //Called once at the beginning of the program
