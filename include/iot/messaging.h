@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <functional>
+#include <iterator>
 
 namespace iot 
 {
@@ -56,8 +57,13 @@ namespace iot
 
     class ModuleBuffer
     {
+        
         private:
+            using SerializeFunction = std::function<void(Serializer*)>;
+            
             std::vector<int> _sources;
+            std::map<int, SerializeFunction> _messageSerializeMap;
+
             Buffer _messageBuffer;
             Serializer _serializer;
 
@@ -86,6 +92,15 @@ namespace iot
             template<typename msg>
             void subscribe(std::function<void(msg *)> callback)
             {
+                map<int, SerializeFunction>::iterator it = _messageSerializeMap.find(MessageId<msg>::id);
+                if(it == _messageSerializeMap.end())
+                {
+                    //subscribe serializer
+
+                }
+
+                //call subscribed serializer
+                _messageSerializeMap[MessageId<msg>::id] = [](Serializer* serializer)
                 _message.subscribe<msg>(callback, false);
             }
     };
