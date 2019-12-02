@@ -57,7 +57,7 @@ namespace iot
     void ModulePack::add(Interceptor* interceptor)
     {
         interceptor->setInterceptorBuffer(&_interceptorBuffer);
-        interceptor->setMessageBuffer(&_moduleBuffer);
+        interceptor->setModuleBuffer(&_moduleBuffer);
 
         _interceptors.push_back(interceptor);
 

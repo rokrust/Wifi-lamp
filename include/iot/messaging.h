@@ -73,11 +73,29 @@ namespace iot
                 return true;
             }
 
+            template<typename msg>
+            void setDeserializeIfNecessary()
+            {
+                std::map<int, SerializeFunction>::iterator it = _messageSerializeMap.find(MessageId<msg>::id);
+                if (it == _messageSerializeMap.end())
+                {
+                    //subscribe serializer
+                }
+
+                //call subscribed serializer
+                _messageSerializeMap[MessageId<msg>::id] = [this](Serializer *serializer) {
+                    msg *message;
+                    message->deserialize(serializer);
+                    
+                    send<msg>(message); //must be sent to interceptor first
+                };
+            }
+
         public:
             template<typename msg>
             bool send(msg* message) 
             {
-                if(!messageBuffer.send<msg>(message)) return false;
+                if(!_messageBuffer.send<msg>(message)) return false;
                 
                 message->serialize(&_serializer);
                 if(_serializer.dirty())
@@ -92,16 +110,9 @@ namespace iot
             template<typename msg>
             void subscribe(std::function<void(msg *)> callback)
             {
-                map<int, SerializeFunction>::iterator it = _messageSerializeMap.find(MessageId<msg>::id);
-                if(it == _messageSerializeMap.end())
-                {
-                    //subscribe serializer
-
-                }
-
-                //call subscribed serializer
-                _messageSerializeMap[MessageId<msg>::id] = [](Serializer* serializer)
-                _message.subscribe<msg>(callback, false);
+                
+                setDeserializeIfNecessary<msg>();
+                _messageBuffer.subscribe<msg>(callback, false);
             }
     };
 

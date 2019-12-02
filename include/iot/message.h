@@ -7,9 +7,9 @@ typedef unsigned char Byte;
 #define READTYPE(type) Byte p[sizeof(type)]; readStream(p, sizeof(type)); return *((type *)p)
 
 
+class Serializer;
 namespace iot
 {
-    class Serializer;
     
     namespace Messages { static unsigned int messageCount = 0; }
     
@@ -36,7 +36,7 @@ class Serializer
         bool _block;
         bool _dirty;
 
-        void writeStream(Byte *var, int size)
+        void writeStream(Byte *var, unsigned int size)
         {
             while(_block);
             _block = true;
@@ -96,7 +96,7 @@ class Serializer
 
         void resetPointer() { _byte = 0; }
 
-        void copy(Byte* stream, int size)
+        void copy(Byte* stream, unsigned int size)
         {
             //Resize if necessary
             if(_stream.size() < size) _stream.resize(size);
