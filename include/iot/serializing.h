@@ -1,46 +1,38 @@
-#include "iot/message.h"
 #include <cstdint>
+#include <vector>
 
 typedef unsigned char Byte;
 #define READTYPE(type) Byte p[sizeof(type)]; readStream(p, sizeof(type)); return *((type*)p);
 
-class Stream
+namespace iot { struct Message; }
+
+class Serializer
 {
-    
     private:
-        Byte _stream[];
+        std::vector<Byte> _stream;
         int _byte;
-        
-        void writeStream(Byte* var, int size) 
-        { 
-            for(int i = 0; i < size; i++)
-                _stream[_byte++] = var[i];
-        }
+        bool _block;
+        bool _dirty;
 
-        void readStream(Byte* p, int size)
-        {
-            for(int i = 0; i < size; i++)
-                p[i] = _stream[_byte++];
-        }
+        void writeStream(Byte *var, unsigned int size);
+        void readStream(Byte *p, int size);
 
-
-    
     public:
-        template<typename T>
-        void write(T var, int size=sizeof(T)) { writeStream((Byte*) &var, size); }
-        void writeMessage(iot::Message* msg)
-        {
-            msg->deserialize(this);
-        }
+        Serializer();
+        bool dirty() { return _dirty; }
+        void clearDirty() { _dirty = false; }
+
+        template <typename T>
+        void write(T var, int size = sizeof(T)) { writeStream((Byte *)&var, size); }
+        void writeMessage(iot::Message *msg);
 
         int32_t readInt32() { READTYPE(int32_t); }
         int16_t readInt16() { READTYPE(int16_t); }
         int8_t readInt8() { READTYPE(int8_t); }
         char readChar() { READTYPE(char); }
-        void readString(char* str) 
-        {
-            for(int i = 0; _stream[_byte] != '\0'; i++)
-                str[i] = _stream[i + _byte++];
-        } 
-        
+        void readString(char *str);
+        void readMessage(iot::Message *message);
+        void resetPointer() { _byte = 0; }
+
+        void copy(Byte *stream, unsigned int size);
 };

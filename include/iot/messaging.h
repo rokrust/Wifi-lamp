@@ -84,10 +84,10 @@ namespace iot
 
                 //call subscribed serializer
                 _messageSerializeMap[MessageId<msg>::id] = [this](Serializer *serializer) {
-                    msg *message;
-                    message->deserialize(serializer);
+                    msg message;
+                    message.deserialize(serializer);
                     
-                    send<msg>(message); //must be sent to interceptor first
+                    send<msg>(&message); //must be sent to interceptor first
                 };
             }
 

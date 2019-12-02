@@ -13,7 +13,7 @@ namespace
         String ssid;
         String password;
 
-        WifiInfo(String ssid, String password) : ssid(ssid), password(password) { }
+        WifiInfo(String ssid="", String password="") : ssid(ssid), password(password) { }
     };
 
     struct WifiAp : public iot::Message
@@ -29,7 +29,7 @@ namespace
         uint8_t buttonNumber;
         State clickType;
 
-        ButtonEvent(uint8_t buttonNumber, State clickType) : buttonNumber(buttonNumber), clickType(clickType) {}
+        ButtonEvent(uint8_t buttonNumber=0, State clickType=SINGLE_CLICK) : buttonNumber(buttonNumber), clickType(clickType) {}
     };
 
     struct TestMessage : public iot::Message
