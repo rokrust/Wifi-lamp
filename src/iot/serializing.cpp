@@ -17,9 +17,10 @@ void Serializer::writeStream(Byte *var, unsigned int size)
 
     _block = false;
     _dirty = true;
+    _size += size;
 }
 
-void Serializer::readStream(Byte *p, int size)
+void Serializer::readStream(Byte *p, unsigned int size)
 {
     while (_block) ;
     _block = true;
@@ -33,6 +34,7 @@ void Serializer::readStream(Byte *p, int size)
 Serializer::Serializer()
 {
     _byte = 0;
+    _size = 0;
     _block = false;
     _dirty = false;
 }

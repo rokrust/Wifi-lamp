@@ -1,5 +1,5 @@
 #pragma once
-#include "iot/messaging.h"
+#include "iot/messagebuffers.h"
 #include <Arduino.h>
 
 namespace iot

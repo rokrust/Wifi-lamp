@@ -10,17 +10,21 @@ class Serializer
 {
     private:
         std::vector<Byte> _stream;
-        int _byte;
+        unsigned int _byte;
+        unsigned int _size;
         bool _block;
         bool _dirty;
 
         void writeStream(Byte *var, unsigned int size);
-        void readStream(Byte *p, int size);
+        void readStream(Byte *p, unsigned int size);
 
     public:
         Serializer();
         bool dirty() { return _dirty; }
         void clearDirty() { _dirty = false; }
+        Byte* getArray() { return _stream.data(); }
+        unsigned int getSize() { return _size; }
+        void clear() { _size = 0; _byte = 0; }
 
         template <typename T>
         void write(T var, int size = sizeof(T)) { writeStream((Byte *)&var, size); }

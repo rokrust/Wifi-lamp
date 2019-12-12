@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "iot/message.h"
+#include "iot/communication.h"
 
 #include <map>
 #include <vector>
@@ -61,16 +62,16 @@ namespace iot
         private:
             using SerializeFunction = std::function<void(Serializer*)>;
             
-            std::vector<int> _sources;
+            std::vector<Transmitter> _broadcasters;
             std::map<int, SerializeFunction> _messageSerializeMap;
 
             Buffer _messageBuffer;
-            Serializer _serializer;
 
             template<typename msg>
             bool broadcast(msg* message)
             {
-                return true;
+                for(int i = 0; i < _broadcasters.size(); i++)
+                    _broadcasters.sendMessage(message);
             }
 
             template<typename msg>
