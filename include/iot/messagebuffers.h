@@ -124,14 +124,6 @@ namespace iot
             Buffer translation;
             Buffer edit;
 
-            enum InterceptorType
-            {
-                FILTER,
-                TRANSLATOR,
-                EDITOR
-            };
-
-            InterceptorType _currentInterceptorType;
             bool _dropTranslatedMessage = false;
 
         public:
